@@ -23,3 +23,6 @@
 	path = emulator/thirdparty/imgui
 	url = https://github.com/visrealm/imgui.git
 	branch = docking
+[submodule "emulator/thirdparty/emu2149"]
+	path = emulator/thirdparty/emu2149
+	url = https://github.com/digital-sound-antiques/emu2149.git

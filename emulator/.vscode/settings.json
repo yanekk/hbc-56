@@ -1,0 +1,17 @@
+{
+    "C_Cpp.default.includePath": [
+        "C:\\cygwin64\\usr\\include",
+        ".\\thirdparty\\imgui",
+        ".\\thirdparty\\imgui\\backends"
+    ],
+    "files.associations": {
+        "*.asm": "vasmmot",
+        "*.h": "c",
+        "charconv": "cpp",
+        "xmemory": "cpp"
+    },
+    "C_Cpp.default.defines": [
+        "VR_6502_EMU_STATIC=1"
+    ],
+    "C_Cpp.default.compilerPath": "c:\\Users\\yanek\\.vscode\\extensions\\bartmanabyss.amiga-debug-1.0.0\\bin\\opt\\bin\\m68k-amiga-elf-gcc.exe"
+}
