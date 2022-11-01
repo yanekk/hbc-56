@@ -26,3 +26,6 @@
 [submodule "emulator/thirdparty/emu2149"]
 	path = emulator/thirdparty/emu2149
 	url = https://github.com/digital-sound-antiques/emu2149.git
+[submodule "emulator/thirdparty/acutest"]
+	path = emulator/thirdparty/acutest
+	url = https://github.com/mity/acutest.git
