@@ -1,14 +1,10 @@
 {
-    "C_Cpp.default.includePath": [
-        "C:\\cygwin64\\usr\\include",
-        ".\\thirdparty\\imgui",
-        ".\\thirdparty\\imgui\\backends"
-    ],
     "files.associations": {
         "*.asm": "vasmmot",
         "*.h": "c",
         "charconv": "cpp",
-        "xmemory": "cpp"
+        "xmemory": "cpp",
+        "typeinfo": "cpp"
     },
     "C_Cpp.default.defines": [
         "VR_6502_EMU_STATIC=1"

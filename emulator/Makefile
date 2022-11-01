@@ -56,7 +56,6 @@ CFLAGS_W = -Wall -Wl,-subsystem,console
 build: $(BIN_DIR)/$(OUT).exe
 
 -include $(OBJECTS:.o=.d)
-
 $(C_OBJECTS) : obj/%.o : %.c 
 	mkdir -p $(dir $@)
 	$(info Compiling $<)
@@ -80,3 +79,20 @@ $(BIN_DIR)/$(OUT).exe: $(OBJECTS)
 clean:
 	$(info Cleaning...)
 	rm $(OBJ_DIR) $(BIN_DIR) -r
+
+INCLUDES_TEST = $(INCLUDES) -Ithirdparty/acutest/include
+
+TEST_SOURCE_FILE = $(subst \,/,$(FILE))
+TEST_OBJECT_FILE = $(addprefix obj\, $(addsuffix .o, $(basename $(TEST_SOURCE_FILE))))
+
+TESTED_SOURCE_FILE = $(subst test/,,$(dir $(TEST_SOURCE_FILE))$(subst test_,,$(notdir $(TEST_SOURCE_FILE))))
+TESTED_OBJECT_FILE = $(addprefix obj/src/, $(addsuffix .o, $(basename $(TESTED_SOURCE_FILE))))
+
+build_test: $(TESTED_OBJECT_FILE)	
+	mkdir -p $(dir $(TEST_OBJECT_FILE))
+	mkdir -p $(BIN_DIR)
+	$(GCC) -g $(MODULE_CFLAGS) $(CFLAGS_W) $(INCLUDES_TEST) -I$(INCLUDE_PATH) -c $(TEST_SOURCE_FILE) -o $(TEST_OBJECT_FILE)
+	$(GPP) -g $(CFLAGS_W) $(TEST_OBJECT_FILE) $(TESTED_OBJECT_FILE) -o $(BIN_DIR)/run_tests
+
+run_test: compile_test
+	$(BIN_DIR)/run_tests.exe
