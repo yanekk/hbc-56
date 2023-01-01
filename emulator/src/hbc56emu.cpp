@@ -32,7 +32,7 @@
 #include "devices/nes_device.h"
 #include "devices/ay38910_device.h"
 #include "devices/uart_device.h"
-
+#include "devices/cf_device.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -767,7 +767,6 @@ static int loadRom(const char* filename)
 #else
   fopen_s(&ptr, filename, "rb");
 #endif
-
   SDL_snprintf(tempBuffer, sizeof(tempBuffer), "Troy's HBC-56 Emulator - %s", filename);
   //state->window_title = tempBuffer;
 
@@ -782,6 +781,7 @@ static int loadRom(const char* filename)
     if (romLoaded)
     {
       SDL_strlcpy(labelMapFile, filename, FILENAME_MAX);
+      
       size_t ln = SDL_strlen(labelMapFile);
       SDL_strlcpy(labelMapFile + ln, ".lmap", FILENAME_MAX - ln);
 
@@ -792,6 +792,7 @@ static int loadRom(const char* filename)
 #endif
       if (ptr)
       {
+
         fseek(ptr, 0, SEEK_END);
         long fsize = ftell(ptr);
         fseek(ptr, 0, SEEK_SET);  /* same as rewind(f); */
@@ -1047,7 +1048,7 @@ int main(int argc, char* argv[])
   hbc56AddDevice(createUartDevice(HBC56_IO_ADDRESS(HBC56_UART_PORT), HBC56_UART_PORTNAME, HBC56_UART_CLOCK_FREQ, HBC56_UART_IRQ));
 #endif
 #endif
-
+  hbc56AddDevice(createCompactFlashDevice(HBC56_CF_ADDRESS, NULL));
   done = 0;
 
   /* reset the machine */

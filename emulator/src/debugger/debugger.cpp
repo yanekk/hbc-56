@@ -66,6 +66,7 @@ void debuggerLoadLabels(const char* labelFileContents)
     }
   }
 
+
   if (labelFileContents)
   {
     char lineBuffer[1024];
@@ -85,6 +86,8 @@ void debuggerLoadLabels(const char* labelFileContents)
 
       int i = 0;
       int len = (int)strlen(lineBuffer);
+
+
       for (i = 0; i < len; ++i)
       {
         char c = lineBuffer[i];
@@ -112,7 +115,6 @@ void debuggerLoadLabels(const char* labelFileContents)
           }
         }
       }
-
       if (valueStart == -1)
       {
         continue;
@@ -124,7 +126,7 @@ void debuggerLoadLabels(const char* labelFileContents)
 
 
       char valueStr[100] = { 0 };
-
+      
       SDL_strlcpy(valueStr, lineBuffer + valueStart, valueEnd - valueStart + 1);
 
       unsigned int value = 0;

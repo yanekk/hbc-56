@@ -4,7 +4,11 @@
         "*.h": "c",
         "charconv": "cpp",
         "xmemory": "cpp",
-        "typeinfo": "cpp"
+        "typeinfo": "cpp",
+        "array": "c",
+        "string": "c",
+        "string_view": "c",
+        "vector": "c"
     },
     "C_Cpp.default.defines": [
         "VR_6502_EMU_STATIC=1"
