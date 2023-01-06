@@ -18,6 +18,7 @@ typedef struct CompactFlashSpy {
 CompactFlashSpy compactFlashSpy = {};
 
 CompactFlash cfCard = {};
+HBC56Device testDevice;
 
 CompactFlash* CompactFlash_Create(const uint8_t *data) {
     compactFlashSpy.isCreated = true;
@@ -55,14 +56,22 @@ void CompactFlash_SectorCount_Write(CompactFlash *device, uint8_t sectorCount) {
 //     return 0;
 // }
 
-void test_reset() {
+
+void testInit() {
     compactFlashSpy = (CompactFlashSpy){0};
+    testDevice = createCompactFlashDevice(BASE_ADDRESS, NULL);
+}
+
+uint8_t testRead(uint8_t offset) {
+    uint8_t value = 0;
+    readDevice(&testDevice, BASE_ADDRESS + offset, &value, 0);
+    return value;
 }
 
 void test_createDevice_nameIsSet(void)
 {
     // arrange
-    test_reset();
+    compactFlashSpy = (CompactFlashSpy){0};
 
     // act
     HBC56Device testDevice = createCompactFlashDevice(0, NULL);
@@ -74,7 +83,7 @@ void test_createDevice_nameIsSet(void)
 void test_createDevice_cfCardIsCreated(void)
 {
     // arrange
-    test_reset();
+    compactFlashSpy = (CompactFlashSpy){0};
 
     // act
     createCompactFlashDevice(0, NULL);
@@ -86,10 +95,9 @@ void test_createDevice_cfCardIsCreated(void)
 void test_destroyDevice_cfCardIsDestroyed(void)
 {
     // arrange
-    test_reset();
+    testInit(); 
 
     // act
-    HBC56Device testDevice = createCompactFlashDevice(0, NULL);
     destroyDevice(&testDevice);
 
     // assert 
@@ -99,38 +107,23 @@ void test_destroyDevice_cfCardIsDestroyed(void)
 void test_readDevice_CF_STAT_zeroByDefault(void)
 {
     // arrange
-    test_reset();
-
-    HBC56Device testDevice = createCompactFlashDevice(BASE_ADDRESS, NULL);
+    testInit(); 
     
-    uint8_t expectedStatus = 0b00000000;
-    uint8_t actualStatus = 0;
-
     // act
-    readDevice(&testDevice, BASE_ADDRESS + CF_STAT, &actualStatus, 0);
+    uint8_t actualStatus = testRead(CF_STAT);
 
     // assert
-    TEST_ASSERT(actualStatus == expectedStatus);
+    TEST_ASSERT(actualStatus ==  0b00000000);
 }
 
 void test_readDevice_CF_STAT_statusErrorSetBit0(void)
 {
     // arrange
-    test_reset();
-
-    HBC56Device testDevice = createCompactFlashDevice(BASE_ADDRESS, NULL);
-    
-    
+    testInit(); 
     compactFlashSpy.statusError = true;
-    uint8_t expectedStatus = 0b00000001;
 
-    uint8_t actualStatus = 0;
-
-    // act
-    readDevice(&testDevice, BASE_ADDRESS + CF_STAT, &actualStatus, 0);
-
-    // assert
-    TEST_ASSERT(actualStatus == expectedStatus);
+    // act & assert
+    TEST_ASSERT(testRead(CF_STAT) == 0b00000001);
 }
 
 TEST_LIST = {
