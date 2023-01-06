@@ -30,29 +30,27 @@ CompactFlash* CompactFlash_Create(const uint8_t * data);
 // // Bit 7 (BUSY) The busy bit is set when the CompactFlash Memory Card has access to the command buffer and registers and
 // // the host is locked out from accessing the command register and buffer. No other bits in this register are valid
 // // when this bit is set to a 1.
-// bool CompactFlash_Get_Status_Busy(CompactFlash *device);
+bool CompactFlash_Read_Status_Busy(CompactFlash *device);
 
 // // Bit 6 (RDY) RDY indicates whether the device is capable of performing CompactFlash Memory Card operations. This bit
 // // is cleared at power up and remains cleared until the CompactFlash Card is ready to accept a command.
-// bool CompactFlash_Read_Status_Ready(CompactFlash *device);
+bool CompactFlash_Read_Status_Ready(CompactFlash *device);
 
 // // Bit 5 (DWF) This bit, if set, indicates a write fault has occurred.
-// bool CompactFlash_Read_Status_DriveWriteFault(CompactFlash *device);
+bool CompactFlash_Read_Status_DriveWriteFault(CompactFlash *device);
 
 // // Bit 4 (DSC) This bit is set when the CompactFlash Memory Card is ready.
-// bool CompactFlash_Read_Status_MemoryCardReady(CompactFlash *device);
+bool CompactFlash_Read_Status_MemoryCardReady(CompactFlash *device);
 
 // // Bit 3 (DRQ) The Data Request is set when the CompactFlash Memory Card requires that information be transferred either
 // // to or from the host through the Data register.
-// bool CompactFlash_Read_Status_DataRequest(CompactFlash *device);
+bool CompactFlash_Read_Status_DataRequest(CompactFlash *device);
 
 // // Bit 2 (CORR) This bit is set when a Correctable data error has been encountered and the data has been corrected. This
 // // condition does not terminate a multi-sector read operation.
-// bool CompactFlash_Read_Status_CorrectableDataError(CompactFlash *device);
+bool CompactFlash_Read_Status_CorrectableDataError(CompactFlash *device);
 
 // // Bit 1 (IDX) This bit is always set to 0.
-// bool CompactFlash_Read_Status_Index(CompactFlash *device);
-
 // // Bit 0 (ERR) This bit is set when the previous command has ended in some type of error. The bits in the Error register
 // // contain additional information describing the error. 
 bool CompactFlash_Read_Status_Error(CompactFlash *device);

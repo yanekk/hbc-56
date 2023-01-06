@@ -10,19 +10,50 @@ typedef struct CompactFlashSpy {
     bool isDestroyed;
 
     bool statusError;
+    bool statusCorrectableDataError;
+    bool statusDataRequest;
+    bool statusMemoryCardReady;
+    bool statusDriveWriteFault;
+    bool statusReady;
+    bool statusBusy;
 
     uint8_t sectorCount;
-    CompactFlash data;
+    uint8_t * data;
 } CompactFlashSpy;
 
 CompactFlashSpy compactFlashSpy = {};
+CompactFlash testCfCard = {};
 
-CompactFlash cfCard = {};
 HBC56Device testDevice;
 
 CompactFlash* CompactFlash_Create(const uint8_t *data) {
     compactFlashSpy.isCreated = true;
-    return &compactFlashSpy.data;
+    compactFlashSpy.data = (uint8_t*)data;
+    return &testCfCard;
+}
+
+bool CompactFlash_Read_Status_Busy(CompactFlash *device) {
+    return compactFlashSpy.statusBusy;
+}
+
+bool CompactFlash_Read_Status_Ready(CompactFlash *device) {
+    return compactFlashSpy.statusReady;
+}
+
+bool CompactFlash_Read_Status_DriveWriteFault(CompactFlash *device) {
+    return compactFlashSpy.statusDriveWriteFault;
+}
+
+bool CompactFlash_Read_Status_MemoryCardReady(CompactFlash *device) {
+    return compactFlashSpy.statusMemoryCardReady;
+}
+
+bool CompactFlash_Read_Status_DataRequest(CompactFlash *device) {
+    return compactFlashSpy.statusDataRequest;
+}
+
+bool CompactFlash_Read_Status_CorrectableDataError(CompactFlash *device) {
+    return compactFlashSpy.statusCorrectableDataError;
 }
 
 bool CompactFlash_Read_Status_Error(CompactFlash *device) {
@@ -33,7 +64,7 @@ void CompactFlash_Destroy(CompactFlash * device) {
       compactFlashSpy.isDestroyed = true;
 }
 
-void CompactFlash_SectorCount_Write(CompactFlash *device, uint8_t sectorCount) {
+void CompactFlash_Write_SectorCount(CompactFlash *device, uint8_t sectorCount) {
     compactFlashSpy.sectorCount = sectorCount;
 }
 
@@ -92,6 +123,19 @@ void test_createDevice_cfCardIsCreated(void)
     TEST_ASSERT(compactFlashSpy.isCreated == true);
 }
 
+void test_createDevice_dataIsPassedToCfCard(void)
+{
+    // arrange
+    compactFlashSpy = (CompactFlashSpy){0};
+    uint8_t data[] = {0, 1, 2, 3, 4};
+
+    // act
+    createCompactFlashDevice(0, data);
+
+    // assert 
+    TEST_ASSERT(compactFlashSpy.data == data);
+}
+
 void test_destroyDevice_cfCardIsDestroyed(void)
 {
     // arrange
@@ -126,11 +170,77 @@ void test_readDevice_CF_STAT_statusErrorSetBit0(void)
     TEST_ASSERT(testRead(CF_STAT) == 0b00000001);
 }
 
+void test_readDevice_CF_STAT_statusCorrectableDataErrorSetBit2(void)
+{
+    // arrange
+    testInit(); 
+    compactFlashSpy.statusCorrectableDataError = true;
+
+    // act & assert
+    TEST_ASSERT(testRead(CF_STAT) == 0b00000100);
+}
+
+void test_readDevice_CF_STAT_statusDataRequestSetBit3(void)
+{
+    // arrange
+    testInit(); 
+    compactFlashSpy.statusDataRequest = true;
+
+    // act & assert
+    TEST_ASSERT(testRead(CF_STAT) == 0b00001000);
+}
+
+void test_readDevice_CF_STAT_statusMemoryCardReadySetBit4(void)
+{
+    // arrange
+    testInit(); 
+    compactFlashSpy.statusMemoryCardReady = true;
+
+    // act & assert
+    TEST_ASSERT(testRead(CF_STAT) == 0b00010000);
+}
+
+void test_readDevice_CF_STAT_statusDriveWriteFaultSetBit5(void)
+{
+    // arrange
+    testInit(); 
+    compactFlashSpy.statusDriveWriteFault = true;
+
+    // act & assert
+    TEST_ASSERT(testRead(CF_STAT) == 0b00100000);
+}
+
+void test_readDevice_CF_STAT_statusReadySetBit6(void)
+{
+    // arrange
+    testInit(); 
+    compactFlashSpy.statusReady = true;
+
+    // act & assert
+    TEST_ASSERT(testRead(CF_STAT) == 0b01000000);
+}
+
+void test_readDevice_CF_STAT_statusBusySetBit7(void)
+{
+    // arrange
+    testInit(); 
+    compactFlashSpy.statusBusy = true;
+
+    // act & assert
+    TEST_ASSERT(testRead(CF_STAT) == 0b10000000);
+}
+
 TEST_LIST = {
    { "test_createDevice_nameIsSet", test_createDevice_nameIsSet },
    { "test_createDevice_cfCardIsCreated", test_createDevice_cfCardIsCreated },
+   { "test_createDevice_dataIsPassedToCfCard", test_createDevice_dataIsPassedToCfCard },
    { "test_destroyDevice_cfCardIsDestroyed", test_destroyDevice_cfCardIsDestroyed },
    { "test_readDevice_CF_STAT_zeroByDefault", test_readDevice_CF_STAT_zeroByDefault },
    { "test_readDevice_CF_STAT_statusErrorSetBit0", test_readDevice_CF_STAT_statusErrorSetBit0 },
+   { "test_readDevice_CF_STAT_statusCorrectableDataErrorSetBit2", test_readDevice_CF_STAT_statusCorrectableDataErrorSetBit2 },
+   { "test_readDevice_CF_STAT_statusDataRequestSetBit3", test_readDevice_CF_STAT_statusDataRequestSetBit3 },
+   { "test_readDevice_CF_STAT_statusMemoryCardReadySetBit4", test_readDevice_CF_STAT_statusMemoryCardReadySetBit4 },
+   { "test_readDevice_CF_STAT_statusReadySetBit6", test_readDevice_CF_STAT_statusReadySetBit6 },
+   { "test_readDevice_CF_STAT_statusBusySetBit7", test_readDevice_CF_STAT_statusBusySetBit7 },
    { NULL, NULL }     /* zeroed record marking the end of the list */
 };
