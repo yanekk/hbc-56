@@ -8,6 +8,7 @@
                 ".\\thirdparty\\imgui",
                 ".\\thirdparty\\imgui\\backends",
                 ".\\thirdparty\\acutest\\include",
+                ".\\thirdparty\\sdl\\include",
                 ".\\modules\\65c02\\src",
                 "src"
             ],

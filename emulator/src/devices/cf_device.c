@@ -13,8 +13,10 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 #include <math.h>
 #include "config.h"
+#include "compactflash/compactflash.h"
 
 static void resetCompactFlashDevice(HBC56Device*);
 static void destroyCompactFlashDevice(HBC56Device*);
@@ -24,7 +26,7 @@ static uint8_t writeCompactFlashDevice(HBC56Device*, uint16_t, uint8_t);
 typedef struct CompactFlashDevice
 {
   uint32_t startAddr;
-  uint8_t *data;
+  CompactFlash *compactFlash;
 } CompactFlashDevice;
 
 // array size is 3072
@@ -228,29 +230,32 @@ HBC56Device createCompactFlashDevice(
   const uint8_t *contents)
 {
   HBC56Device device = createDevice("CompactFlash");
+  
+  CompactFlash* compactFlash = CompactFlash_Create(cf_card);
+  
+  if (!compactFlash) {
+    CompactFlash_Destroy(&compactFlash);
+    destroyDevice(&device);
+    return device;
+  }
 
   CompactFlashDevice* cfDevice = (CompactFlashDevice*)malloc(sizeof(CompactFlashDevice));
-  if (cfDevice)
-  {
-    cfDevice->data = cf_card;
-    cfDevice->startAddr = startAddr;
-    device.data = cfDevice;
-    device.destroyFn = &destroyCompactFlashDevice;
-    device.readFn = &readCompactFlashDevice;
-    device.writeFn = &writeCompactFlashDevice;
-  }
-  else
-  {
+  if (!cfDevice) {
+    CompactFlash_Destroy(&compactFlash);
     destroyDevice(&device);
+    return device;
   }
 
+  cfDevice->compactFlash = &compactFlash;
+  cfDevice->startAddr = startAddr;
+
+  device.data = cfDevice;
+  device.destroyFn = &destroyCompactFlashDevice;
+  device.readFn = &readCompactFlashDevice;
+  device.writeFn = &writeCompactFlashDevice;
   return device;
 }
 
-/* Function:  getMemoryDevice
- * --------------------
- * helper funtion to get private structure
- */
 inline static CompactFlashDevice* getCompactFlashDevice(HBC56Device* device)
 {
   if (!device) return NULL;
@@ -260,52 +265,23 @@ inline static CompactFlashDevice* getCompactFlashDevice(HBC56Device* device)
 static void destroyCompactFlashDevice(HBC56Device *device)
 {
   CompactFlashDevice *cfDevice = getCompactFlashDevice(device);
+  CompactFlash_Destroy(cfDevice->compactFlash);
   free(cfDevice);
   device->data = NULL;
 }
 
-uint8_t testPoint = 0xFF;
 static uint8_t readCompactFlashDevice(HBC56Device* device, uint16_t addr, uint8_t *val, uint8_t dbg)
 {
   const CompactFlashDevice* cfDevice = getCompactFlashDevice(device);
 
   if (addr == cfDevice->startAddr + CF_STAT) {
-    *val = 0b01000100; // no error
+    *val = CompactFlash_Status(cfDevice->compactFlash);
     return 1;
   }
-  *val = testPoint;
   return 1;
-
-//   CompactFlashDevice* cfDevice = getCompactFlashDevice(device);
-//   if (memoryDevice && val)
-//   {
-//     if (addr >= memoryDevice->startAddr &&
-//         addr < memoryDevice->endAddr)
-//     {
-//       *val = memoryDevice->data[addr - memoryDevice->startAddr];
-//       return 1;
-//     }
-//   }
-//   return 0;
 }
 
-/* Function:  writeMemoryDevice
- * --------------------
- * write to the memory device
- */
 static uint8_t writeCompactFlashDevice(HBC56Device* device, uint16_t addr, uint8_t val)
 {
-    testPoint = val;
     return 1;
-//   MemoryDevice* memoryDevice = getMemoryDevice(device);
-//   if (memoryDevice)
-//   {
-//     if (addr >= memoryDevice->startAddr &&
-//         addr < memoryDevice->endAddr)
-//     {
-//       memoryDevice->data[addr - memoryDevice->startAddr] = val;
-//       return 1;
-//     }
-//   }
-//   return 0;
 }
