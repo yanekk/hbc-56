@@ -103,6 +103,24 @@ static uint8_t readCompactFlashDevice(HBC56Device* device, uint16_t addr, uint8_
     }
     return 1;
   }
+  if (addr == cfDevice->startAddr + CF_ERR) {
+    if (CompactFlash_Read_Error_BadBlock(cfDevice->compactFlash)) {
+      *val |= 0b10000000;
+    }
+    if (CompactFlash_Read_Error_UncorrectableError(cfDevice->compactFlash)) {
+      *val |= 0b01000000;
+    }
+    if (CompactFlash_Read_Error_InvalidSector(cfDevice->compactFlash)) {
+      *val |= 0b00010000;
+    }
+    if (CompactFlash_Read_Error_InvalidCommand(cfDevice->compactFlash)) {
+      *val |= 0b00000100;
+    }
+    if (CompactFlash_Read_Error_GeneralError(cfDevice->compactFlash)) {
+      *val |= 0b00000001;
+    }
+    return 1;
+  }
   return 1;
 }
 

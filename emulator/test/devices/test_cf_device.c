@@ -17,6 +17,12 @@ typedef struct CompactFlashSpy {
     bool statusReady;
     bool statusBusy;
 
+    bool errorBadBlock;
+    bool errorUncorrectableError;
+    bool errorInvalidSector;
+    bool errorInvalidCommand;
+    bool errorGeneralError;
+
     uint8_t sectorCount;
     uint8_t * data;
 } CompactFlashSpy;
@@ -58,6 +64,26 @@ bool CompactFlash_Read_Status_CorrectableDataError(CompactFlash *device) {
 
 bool CompactFlash_Read_Status_Error(CompactFlash *device) {
     return compactFlashSpy.statusError;
+}
+
+bool CompactFlash_Read_Error_BadBlock(CompactFlash *device) {
+    return compactFlashSpy.errorBadBlock;
+}
+
+bool CompactFlash_Read_Error_UncorrectableError(CompactFlash *device) {
+    return compactFlashSpy.errorUncorrectableError;
+}
+
+bool CompactFlash_Read_Error_InvalidSector(CompactFlash *device) {
+    return compactFlashSpy.errorInvalidSector;
+}
+
+bool CompactFlash_Read_Error_InvalidCommand(CompactFlash *device) {
+    return compactFlashSpy.errorInvalidCommand;
+}
+
+bool CompactFlash_Read_Error_GeneralError(CompactFlash *device) {
+    return compactFlashSpy.errorGeneralError;
 }
 
 void CompactFlash_Destroy(CompactFlash * device) {
@@ -230,6 +256,56 @@ void test_readDevice_CF_STAT_statusBusySetBit7(void)
     TEST_ASSERT(testRead(CF_STAT) == 0b10000000);
 }
 
+void test_readDevice_CF_ERR_errorBadBlockSetBit7(void)
+{
+    // arrange
+    testInit(); 
+    compactFlashSpy.errorBadBlock = true;
+
+    // act & assert
+    TEST_ASSERT(testRead(CF_ERR) == 0b10000000);
+}
+
+void test_readDevice_CF_ERR_errorUncorrectableErrorSetBit6(void)
+{
+    // arrange
+    testInit(); 
+    compactFlashSpy.errorUncorrectableError = true;
+
+    // act & assert
+    TEST_ASSERT(testRead(CF_ERR) == 0b01000000);
+}
+
+void test_readDevice_CF_ERR_errorInvalidSectorSetBit4(void)
+{
+    // arrange
+    testInit(); 
+    compactFlashSpy.errorInvalidSector = true;
+
+    // act & assert
+    TEST_ASSERT(testRead(CF_ERR) == 0b00010000);
+}
+
+void test_readDevice_CF_ERR_errorInvalidCommandSetBit2(void)
+{
+    // arrange
+    testInit(); 
+    compactFlashSpy.errorInvalidCommand = true;
+
+    // act & assert
+    TEST_ASSERT(testRead(CF_ERR) == 0b00000100);
+}
+
+void test_readDevice_CF_ERR_errorGeneralErrorSetBit0(void)
+{
+    // arrange
+    testInit(); 
+    compactFlashSpy.errorGeneralError = true;
+
+    // act & assert
+    TEST_ASSERT(testRead(CF_ERR) == 0b00000001);
+}
+
 TEST_LIST = {
    { "test_createDevice_nameIsSet", test_createDevice_nameIsSet },
    { "test_createDevice_cfCardIsCreated", test_createDevice_cfCardIsCreated },
@@ -242,5 +318,10 @@ TEST_LIST = {
    { "test_readDevice_CF_STAT_statusMemoryCardReadySetBit4", test_readDevice_CF_STAT_statusMemoryCardReadySetBit4 },
    { "test_readDevice_CF_STAT_statusReadySetBit6", test_readDevice_CF_STAT_statusReadySetBit6 },
    { "test_readDevice_CF_STAT_statusBusySetBit7", test_readDevice_CF_STAT_statusBusySetBit7 },
+   { "test_readDevice_CF_ERR_errorBadBlockSetBit7", test_readDevice_CF_ERR_errorBadBlockSetBit7 },
+   { "test_readDevice_CF_ERR_errorUncorrectableErrorSetBit6", test_readDevice_CF_ERR_errorUncorrectableErrorSetBit6 },
+   { "test_readDevice_CF_ERR_errorInvalidSectorSetBit4", test_readDevice_CF_ERR_errorInvalidSectorSetBit4 },
+   { "test_readDevice_CF_ERR_errorInvalidCommandSetBit2", test_readDevice_CF_ERR_errorInvalidCommandSetBit2 },
+   { "test_readDevice_CF_ERR_errorGeneralErrorSetBit0", test_readDevice_CF_ERR_errorGeneralErrorSetBit0 },
    { NULL, NULL }     /* zeroed record marking the end of the list */
 };

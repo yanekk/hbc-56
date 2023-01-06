@@ -56,23 +56,23 @@ bool CompactFlash_Read_Status_CorrectableDataError(CompactFlash *device);
 bool CompactFlash_Read_Status_Error(CompactFlash *device);
 
 // // Bit 7 (BBK) This bit is set when a Bad Block is detected.
-// uint8_t CompactFlash_Read_Error_BadBlock(CompactFlash *device);
+bool CompactFlash_Read_Error_BadBlock(CompactFlash *device);
 
 // // Bit 6 (UNC) This bit is set when an Uncorrectable Error is encountered.
-// uint8_t CompactFlash_Read_Error_UncorrectableError(CompactFlash *device);
+bool CompactFlash_Read_Error_UncorrectableError(CompactFlash *device);
 
 // // Bit 5 This bit is 0.
 // // Bit 4 (IDNF) The requested sector ID is in error or cannot be found.
-// uint8_t CompactFlash_Read_Error_InvalidSector(CompactFlash *device);
+bool CompactFlash_Read_Error_InvalidSector(CompactFlash *device);
 
 // // Bit 3 This bit is 0.
 // // Bit 2 (Abort) This bit is set if the command has been aborted because of a CompactFlash Memory Card status condition:
 // // (Not Ready, Write Fault, etc.) or when an invalid command has been issued.
-// uint8_t CompactFlash_Read_Error_InvalidCommand(CompactFlash *device);
+bool CompactFlash_Read_Error_InvalidCommand(CompactFlash *device);
 
 // // Bit 1 This bit is 0.
 // // Bit 0 (AMNF) This bit is set in case of a general error. 
-// uint8_t CompactFlash_Read_Error_GeneralError(CompactFlash *device);
+bool CompactFlash_Read_Error_GeneralError(CompactFlash *device);
 
 void CompactFlash_Write_SectorCount(CompactFlash *device, uint8_t sectorCount);
 
