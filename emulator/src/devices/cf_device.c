@@ -79,7 +79,7 @@ static uint8_t readCompactFlashDevice(HBC56Device* device, uint16_t addr, uint8_
 {
   const CompactFlashDevice* cfDevice = getCompactFlashDevice(device);
   uint8_t offset = addr - cfDevice->startAddr;
-  
+
   switch(offset) {
     case CF_STAT:
     *val |= CF_Read_Status_Error(cfDevice->compactFlash) << 0;
@@ -111,6 +111,7 @@ static uint8_t writeCompactFlashDevice(HBC56Device* device, uint16_t addr, uint8
 {
     const CompactFlashDevice* cfDevice = getCompactFlashDevice(device);
     uint8_t offset = addr - cfDevice->startAddr;
+    
     switch(offset) {
       case CF_SECCO:
       CF_Write_SectorCount(cfDevice->compactFlash, val);
