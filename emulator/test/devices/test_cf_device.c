@@ -6,22 +6,22 @@
 #define BASE_ADDRESS 0x1000
 
 typedef struct CompactFlashSpy {
-    bool isCreated;
-    bool isDestroyed;
+    bool isCreated,
+         isDestroyed;
 
-    bool statusError;
-    bool statusCorrectableDataError;
-    bool statusDataRequest;
-    bool statusMemoryCardReady;
-    bool statusDriveWriteFault;
-    bool statusReady;
-    bool statusBusy;
+    bool statusError,
+         statusCorrectableDataError,
+         statusDataRequest,
+         statusMemoryCardReady,
+         statusDriveWriteFault,
+         statusReady,
+         statusBusy;
 
-    bool errorBadBlock;
-    bool errorUncorrectableError;
-    bool errorInvalidSector;
-    bool errorInvalidCommand;
-    bool errorGeneralError;
+    bool errorBadBlock, 
+         errorUncorrectableError,
+         errorInvalidSector,
+         errorInvalidCommand,
+         errorGeneralError;
 
     uint32_t sectorNumber;
 
