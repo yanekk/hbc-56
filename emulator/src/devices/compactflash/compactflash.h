@@ -19,17 +19,23 @@ extern "C" {
 #include <stdint.h>
 #include <stdbool.h>
 
+#define SECTOR_SIZE 512
+
 struct CompactFlash;
 typedef struct CompactFlash CompactFlash;
 
 struct CompactFlash {
     const uint8_t * _data;
     
-    bool _isSectorNumberSet;
+    bool _isSectorNumberInvalid;
     uint32_t _sectorNumber;
 
-    bool _isSectorCountSet;
+    bool _isSectorCountInvalid;
     uint8_t _sectorCount;
+
+    bool _hasDataRequest;
+    uint16_t _dataIndex;
+    uint16_t _dataEnd;
 };
 
 CompactFlash* CF_Create(const uint8_t * data);
