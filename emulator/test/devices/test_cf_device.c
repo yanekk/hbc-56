@@ -36,81 +36,81 @@ CompactFlash testCfCard = {};
 
 HBC56Device testDevice;
 
-CompactFlash* CompactFlash_Create(const uint8_t *data) {
+CompactFlash* CF_Create(const uint8_t *data) {
     compactFlashSpy.isCreated = true;
     compactFlashSpy.data = (uint8_t*)data;
     return &testCfCard;
 }
 
-bool CompactFlash_Read_Status_Busy(CompactFlash *device) {
+bool CF_Read_Status_Busy(CompactFlash *device) {
     return compactFlashSpy.statusBusy;
 }
 
-bool CompactFlash_Read_Status_Ready(CompactFlash *device) {
+bool CF_Read_Status_Ready(CompactFlash *device) {
     return compactFlashSpy.statusReady;
 }
 
-bool CompactFlash_Read_Status_DriveWriteFault(CompactFlash *device) {
+bool CF_Read_Status_DriveWriteFault(CompactFlash *device) {
     return compactFlashSpy.statusDriveWriteFault;
 }
 
-bool CompactFlash_Read_Status_MemoryCardReady(CompactFlash *device) {
+bool CF_Read_Status_MemoryCardReady(CompactFlash *device) {
     return compactFlashSpy.statusMemoryCardReady;
 }
 
-bool CompactFlash_Read_Status_DataRequest(CompactFlash *device) {
+bool CF_Read_Status_DataRequest(CompactFlash *device) {
     return compactFlashSpy.statusDataRequest;
 }
 
-bool CompactFlash_Read_Status_CorrectableDataError(CompactFlash *device) {
+bool CF_Read_Status_CorrectableDataError(CompactFlash *device) {
     return compactFlashSpy.statusCorrectableDataError;
 }
 
-bool CompactFlash_Read_Status_Error(CompactFlash *device) {
+bool CF_Read_Status_Error(CompactFlash *device) {
     return compactFlashSpy.statusError;
 }
 
-bool CompactFlash_Read_Error_BadBlock(CompactFlash *device) {
+bool CF_Read_Error_BadBlock(CompactFlash *device) {
     return compactFlashSpy.errorBadBlock;
 }
 
-bool CompactFlash_Read_Error_UncorrectableError(CompactFlash *device) {
+bool CF_Read_Error_UncorrectableError(CompactFlash *device) {
     return compactFlashSpy.errorUncorrectableError;
 }
 
-bool CompactFlash_Read_Error_InvalidSector(CompactFlash *device) {
+bool CF_Read_Error_InvalidSector(CompactFlash *device) {
     return compactFlashSpy.errorInvalidSector;
 }
 
-bool CompactFlash_Read_Error_InvalidCommand(CompactFlash *device) {
+bool CF_Read_Error_InvalidCommand(CompactFlash *device) {
     return compactFlashSpy.errorInvalidCommand;
 }
 
-bool CompactFlash_Read_Error_GeneralError(CompactFlash *device) {
+bool CF_Read_Error_GeneralError(CompactFlash *device) {
     return compactFlashSpy.errorGeneralError;
 }
 
-void CompactFlash_Destroy(CompactFlash * device) {
+void CF_Destroy(CompactFlash * device) {
       compactFlashSpy.isDestroyed = true;
 }
 
-void CompactFlash_Write_SectorCount(CompactFlash *device, uint8_t sectorCount) {
+void CF_Write_SectorCount(CompactFlash *device, uint8_t sectorCount) {
     compactFlashSpy.sectorCount = sectorCount;
 }
 
-uint32_t CompactFlash_Read_SectorNumber(CompactFlash *device) {
+uint32_t CF_Read_SectorNumber(CompactFlash *device) {
     return compactFlashSpy.sectorNumber;
 }
 
-void CompactFlash_Write_SectorNumber(CompactFlash *device, uint32_t number) {
+void CF_Write_SectorNumber(CompactFlash *device, uint32_t number) {
     compactFlashSpy.sectorNumber = number;
 }
 
-void CompactFlash_Write_Command_ReadSectors(CompactFlash *device) {
+void CF_Write_Command_ReadSectors(CompactFlash *device) {
     compactFlashSpy.executedCommandCode = CF_Command_ReadSectors;
 }
 
-uint8_t CompactFlash_Read_Data(CompactFlash *device) {
+uint8_t CF_Read_Data(CompactFlash *device) {
     return compactFlashSpy.dataByte;
 }
 
