@@ -8,7 +8,8 @@
         "array": "c",
         "string": "c",
         "string_view": "c",
-        "vector": "c"
+        "vector": "c",
+        "iterator": "c"
     },
     "C_Cpp.default.defines": [
         "VR_6502_EMU_STATIC=1"

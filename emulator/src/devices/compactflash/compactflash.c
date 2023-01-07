@@ -21,3 +21,19 @@ CompactFlash* CF_Create(const uint8_t * data) {
     cf->_data = data;
     return cf;
 }
+
+void CF_Destroy(CompactFlash* compactFlash) {
+    if(compactFlash) {
+        free(compactFlash);
+    }
+}
+
+void CF_Write_SectorNumber(CompactFlash *device, uint32_t number) {
+    device->_sectorNumber = number;
+}
+
+
+uint32_t CF_Read_SectorNumber(CompactFlash *device) {
+    return device->_sectorNumber;
+}
+
