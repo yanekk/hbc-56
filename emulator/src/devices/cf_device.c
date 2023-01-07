@@ -80,45 +80,21 @@ static uint8_t readCompactFlashDevice(HBC56Device* device, uint16_t addr, uint8_
   const CompactFlashDevice* cfDevice = getCompactFlashDevice(device);
 
   if (addr == cfDevice->startAddr + CF_STAT) {
-    if (CompactFlash_Read_Status_Error(cfDevice->compactFlash)) {
-      *val |= 0b00000001;
-    }
-    if (CompactFlash_Read_Status_CorrectableDataError(cfDevice->compactFlash)) {
-      *val |= 0b00000100;
-    }
-    if (CompactFlash_Read_Status_DataRequest(cfDevice->compactFlash)) {
-      *val |= 0b00001000;
-    }
-    if (CompactFlash_Read_Status_MemoryCardReady(cfDevice->compactFlash)) {
-      *val |= 0b00010000;
-    }
-    if (CompactFlash_Read_Status_DriveWriteFault(cfDevice->compactFlash)) {
-      *val |= 0b00100000;
-    }
-    if (CompactFlash_Read_Status_Ready(cfDevice->compactFlash)) {
-      *val |= 0b01000000;
-    }
-    if (CompactFlash_Read_Status_Busy(cfDevice->compactFlash)) {
-      *val |= 0b10000000;
-    }
+    *val |= CompactFlash_Read_Status_Error(cfDevice->compactFlash) << 0;
+    *val |= CompactFlash_Read_Status_CorrectableDataError(cfDevice->compactFlash) << 2;
+    *val |= CompactFlash_Read_Status_DataRequest(cfDevice->compactFlash) << 3;
+    *val |= CompactFlash_Read_Status_MemoryCardReady(cfDevice->compactFlash) << 4;
+    *val |= CompactFlash_Read_Status_DriveWriteFault(cfDevice->compactFlash) << 5;
+    *val |= CompactFlash_Read_Status_Ready(cfDevice->compactFlash) << 6;
+    *val |= CompactFlash_Read_Status_Busy(cfDevice->compactFlash) << 7;
     return 1;
   }
   if (addr == cfDevice->startAddr + CF_ERR) {
-    if (CompactFlash_Read_Error_BadBlock(cfDevice->compactFlash)) {
-      *val |= 0b10000000;
-    }
-    if (CompactFlash_Read_Error_UncorrectableError(cfDevice->compactFlash)) {
-      *val |= 0b01000000;
-    }
-    if (CompactFlash_Read_Error_InvalidSector(cfDevice->compactFlash)) {
-      *val |= 0b00010000;
-    }
-    if (CompactFlash_Read_Error_InvalidCommand(cfDevice->compactFlash)) {
-      *val |= 0b00000100;
-    }
-    if (CompactFlash_Read_Error_GeneralError(cfDevice->compactFlash)) {
-      *val |= 0b00000001;
-    }
+    *val |= CompactFlash_Read_Error_BadBlock(cfDevice->compactFlash) << 7;
+    *val |= CompactFlash_Read_Error_UncorrectableError(cfDevice->compactFlash) << 6;
+    *val |= CompactFlash_Read_Error_InvalidSector(cfDevice->compactFlash) << 4;
+    *val |= CompactFlash_Read_Error_InvalidCommand(cfDevice->compactFlash) << 2;
+    *val |= CompactFlash_Read_Error_GeneralError(cfDevice->compactFlash) << 0;
     return 1;
   }
   return 1;
