@@ -97,10 +97,36 @@ static uint8_t readCompactFlashDevice(HBC56Device* device, uint16_t addr, uint8_
     *val |= CompactFlash_Read_Error_GeneralError(cfDevice->compactFlash) << 0;
     return 1;
   }
+
   return 1;
 }
 
 static uint8_t writeCompactFlashDevice(HBC56Device* device, uint16_t addr, uint8_t val)
 {
+    const CompactFlashDevice* cfDevice = getCompactFlashDevice(device);
+
+    if(addr == cfDevice->startAddr + CF_SECCO) {
+      CompactFlash_Write_SectorCount(cfDevice->compactFlash, val);
+    }
+    if(addr == cfDevice->startAddr + CF_LBA0) {
+      CompactFlash_Write_SectorNumber(cfDevice->compactFlash,
+        (CompactFlash_Read_SectorNumber(cfDevice->compactFlash) & 0xFFFFFF00) | val
+      );
+    }
+    if(addr == cfDevice->startAddr + CF_LBA1) {
+      CompactFlash_Write_SectorNumber(cfDevice->compactFlash,
+        (CompactFlash_Read_SectorNumber(cfDevice->compactFlash) & 0xFFFF00FF) | (val << 8)
+      );
+    }
+    if(addr == cfDevice->startAddr + CF_LBA2) {
+      CompactFlash_Write_SectorNumber(cfDevice->compactFlash,
+        (CompactFlash_Read_SectorNumber(cfDevice->compactFlash) & 0xFF00FFFF) | (val << 16)
+      );
+    }
+    if(addr == cfDevice->startAddr + CF_LBA3) {
+      CompactFlash_Write_SectorNumber(cfDevice->compactFlash,
+        (CompactFlash_Read_SectorNumber(cfDevice->compactFlash) & 0x00FFFFFF) | (val << 24) & 0x1F000000
+      );
+    }
     return 1;
 }

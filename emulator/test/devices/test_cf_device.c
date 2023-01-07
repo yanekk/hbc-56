@@ -23,6 +23,8 @@ typedef struct CompactFlashSpy {
     bool errorInvalidCommand;
     bool errorGeneralError;
 
+    uint32_t sectorNumber;
+
     uint8_t sectorCount;
     uint8_t * data;
 } CompactFlashSpy;
@@ -94,13 +96,13 @@ void CompactFlash_Write_SectorCount(CompactFlash *device, uint8_t sectorCount) {
     compactFlashSpy.sectorCount = sectorCount;
 }
 
-// uint8_t CompactFlash_SectorNumber_Write(CompactFlash *device, uint8_t number, uint8_t offset) {
-//     // CFLBA0  = CFBASE + $03		; LBA bits 0-7 (R/W, LBA mode) => offset 0
-//     // CFLBA1  = CFBASE + $04		; LBA bits 8-15 (R/W, LBA mode) => offset 7
-//     // CFLBA2  = CFBASE + $05		; LBA bits 16-23 (R/W, LBA mode) => offset 15
-//     // CFLBA3  = CFBASE + $06		; LBA bits 24-27 (R/W, LBA mode) => offset 23 (4 lower bits only!)
-//     return 0;
-// }
+uint32_t CompactFlash_Read_SectorNumber(CompactFlash *device) {
+    return compactFlashSpy.sectorNumber;
+}
+
+void CompactFlash_Write_SectorNumber(CompactFlash *device, uint32_t number) {
+    compactFlashSpy.sectorNumber = number;
+}
 
 // uint8_t CompactFlash_Command_ReadSector(CompactFlash *device) {
 //     // LDA #$20                ; Read command
@@ -123,6 +125,10 @@ uint8_t testRead(uint8_t offset) {
     uint8_t value = 0;
     readDevice(&testDevice, BASE_ADDRESS + offset, &value, 0);
     return value;
+}
+
+void testWrite(uint8_t offset, uint8_t value) {
+    writeDevice(&testDevice, BASE_ADDRESS + offset, value);
 }
 
 void test_createDevice_nameIsSet(void)
@@ -306,6 +312,117 @@ void test_readDevice_CF_ERR_errorGeneralErrorSetBit0(void)
     TEST_ASSERT(testRead(CF_ERR) == 0b00000001);
 }
 
+void test_writeDevice_CF_SECCO_sectorCountIsSet(void)
+{
+    // arrange
+    testInit();
+    uint8_t expectedSectorCount = 6;
+
+    testWrite(CF_SECCO, expectedSectorCount);
+
+    // act & assert
+    TEST_ASSERT(compactFlashSpy.sectorCount == expectedSectorCount);
+}
+
+void test_writeDevice_CFLBA0_first0_7OfSectorNumberAreSet(void)
+{
+    // arrange
+    testInit();
+    testWrite(CF_LBA0, 0xAF);
+
+    // act & assert
+    TEST_ASSERT(compactFlashSpy.sectorNumber == 0x000000AF);
+}
+
+void test_writeDevice_CFLBA0_bits0_7OfSectorNumberAreOverwritten(void)
+{
+    // arrange
+    testInit();
+    compactFlashSpy.sectorNumber = 0x000000FF;
+    testWrite(CF_LBA0,  0x01);
+
+    // act & assert
+    TEST_ASSERT(compactFlashSpy.sectorNumber == 0x00000001);
+}
+
+void test_writeDevice_CFLBA1_bits8_15bitsOfSectorNumberAreSet(void)
+{
+    // arrange
+    testInit();
+    testWrite(CF_LBA1, 0xAF);
+
+    // act & assert
+    TEST_ASSERT(compactFlashSpy.sectorNumber == 0x0000AF00);
+}
+
+void test_writeDevice_CFLBA1_bits8_15OfSectorNumberAreOverwritten(void)
+{
+    // arrange
+    testInit();
+    compactFlashSpy.sectorNumber = 0x0000FF00;
+    testWrite(CF_LBA1, 0x01);
+
+    // act & assert
+    TEST_ASSERT(compactFlashSpy.sectorNumber == 0x00000100);
+}
+
+void test_writeDevice_CFLBA2_bits16_23bitsOfSectorNumberAreSet(void)
+{
+    // arrange
+    testInit();
+    testWrite(CF_LBA2, 0xAF);
+
+    // act & assert
+    TEST_ASSERT(compactFlashSpy.sectorNumber == 0x00AF0000);
+}
+
+void test_writeDevice_CFLBA2_bits16_23OfSectorNumberAreOverwritten(void)
+{
+    // arrange
+    testInit();
+    compactFlashSpy.sectorNumber = 0x0000FF00;
+    testWrite(CF_LBA2, 0x01);
+
+    // act & assert
+    TEST_ASSERT(compactFlashSpy.sectorNumber == 0x00010000);
+}
+
+void test_writeDevice_CFLBA3_bits24_27bitsOfSectorNumberAreSet(void)
+{
+    // arrange
+    testInit();
+    testWrite(CF_LBA3, 0xFF);
+
+    // act & assert
+    TEST_ASSERT(compactFlashSpy.sectorNumber == 0x1F000000);
+}
+
+void test_writeDevice_CFLBA3_bits24_27OfSectorNumberAreOverwritten(void)
+{
+    // arrange
+    testInit();
+    compactFlashSpy.sectorNumber = 0x01000000;
+    testWrite(CF_LBA3, 0x01);
+
+    // act & assert
+    TEST_ASSERT(compactFlashSpy.sectorNumber == 0x01000000);
+}
+
+void test_writeDevice_CFLBAX_allBitsAreSet(void)
+{
+    // arrange
+    testInit();
+    compactFlashSpy.sectorNumber = 0x01000000;
+    
+    testWrite(CF_LBA3, 0x01);
+    testWrite(CF_LBA2, 0x23);
+    testWrite(CF_LBA1, 0x45);
+    testWrite(CF_LBA0, 0x67);
+
+    // act & assert
+    TEST_ASSERT(compactFlashSpy.sectorNumber == 0x01234567);
+}
+
 TEST_LIST = {
    { "test_createDevice_nameIsSet", test_createDevice_nameIsSet },
    { "test_createDevice_cfCardIsCreated", test_createDevice_cfCardIsCreated },
@@ -323,5 +440,16 @@ TEST_LIST = {
    { "test_readDevice_CF_ERR_errorInvalidSectorSetBit4", test_readDevice_CF_ERR_errorInvalidSectorSetBit4 },
    { "test_readDevice_CF_ERR_errorInvalidCommandSetBit2", test_readDevice_CF_ERR_errorInvalidCommandSetBit2 },
    { "test_readDevice_CF_ERR_errorGeneralErrorSetBit0", test_readDevice_CF_ERR_errorGeneralErrorSetBit0 },
+   { "test_writeDevice_CF_SECCO_sectorCountIsSet", test_writeDevice_CF_SECCO_sectorCountIsSet },
+   { "test_writeDevice_CFLBA0_first0_7OfSectorNumberAreSet", test_writeDevice_CFLBA0_first0_7OfSectorNumberAreSet },
+   { "test_writeDevice_CFLBA0_bits0_7OfSectorNumberAreOverwritten", test_writeDevice_CFLBA0_bits0_7OfSectorNumberAreOverwritten },
+   { "test_writeDevice_CFLBA1_bits8_15bitsOfSectorNumberAreSet", test_writeDevice_CFLBA1_bits8_15bitsOfSectorNumberAreSet },
+   { "test_writeDevice_CFLBA1_bits8_15OfSectorNumberAreOverwritten", test_writeDevice_CFLBA1_bits8_15OfSectorNumberAreOverwritten },
+   { "test_writeDevice_CFLBA2_bits16_23bitsOfSectorNumberAreSet", test_writeDevice_CFLBA2_bits16_23bitsOfSectorNumberAreSet },
+   { "test_writeDevice_CFLBA2_bits16_23OfSectorNumberAreOverwritten", test_writeDevice_CFLBA2_bits16_23bitsOfSectorNumberAreSet },
+   { "test_writeDevice_CFLBA3_bits24_27bitsOfSectorNumberAreSet", test_writeDevice_CFLBA3_bits24_27bitsOfSectorNumberAreSet },
+   { "test_writeDevice_CFLBA3_bits24_27OfSectorNumberAreOverwritten", test_writeDevice_CFLBA3_bits24_27OfSectorNumberAreOverwritten },
+   { "test_writeDevice_CFLBAX_allBitsAreSet", test_writeDevice_CFLBAX_allBitsAreSet },   
+
    { NULL, NULL }     /* zeroed record marking the end of the list */
 };
