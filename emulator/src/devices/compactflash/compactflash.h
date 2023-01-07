@@ -79,7 +79,7 @@ uint32_t CompactFlash_Read_SectorNumber(CompactFlash *device);
 void CompactFlash_Write_SectorNumber(CompactFlash *device, uint32_t number);
 
 // uint8_t CompactFlash_Write_Command_ReadSector(CompactFlash *device);
-// uint8_t CompactFlash_Read_Data(CompactFlash *device);
+uint8_t CompactFlash_Read_Data(CompactFlash *device);
 
 void CompactFlash_Destroy(CompactFlash * device);
 

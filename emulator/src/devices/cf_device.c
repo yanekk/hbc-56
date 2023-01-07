@@ -97,6 +97,10 @@ static uint8_t readCompactFlashDevice(HBC56Device* device, uint16_t addr, uint8_
     *val |= CompactFlash_Read_Error_GeneralError(cfDevice->compactFlash) << 0;
     return 1;
   }
+  if(addr == cfDevice->startAddr + CF_DATA) {
+    *val = CompactFlash_Read_Data(cfDevice->compactFlash);
+    return 1;
+  }
 
   return 1;
 }
