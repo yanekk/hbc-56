@@ -18,6 +18,13 @@
 
 CompactFlash* CF_Create(const uint8_t * data) {
     CompactFlash* cf = malloc(sizeof(CompactFlash));
+    
+    cf->_isSectorNumberInvalid = true;
+    cf->_sectorNumber = 0;    
+    
+    cf->_isSectorCountInvalid = true;
+    cf->_sectorCount = 0;
+    
     cf->_data = data;
     return cf;
 }
@@ -29,11 +36,29 @@ void CF_Destroy(CompactFlash* compactFlash) {
 }
 
 void CF_Write_SectorNumber(CompactFlash *device, uint32_t number) {
+    device->_isSectorNumberInvalid = false;
     device->_sectorNumber = number;
 }
 
 
 uint32_t CF_Read_SectorNumber(CompactFlash *device) {
+
     return device->_sectorNumber;
 }
 
+bool CF_Read_Status_DataRequest(CompactFlash *device) {
+    return false;
+}
+
+void CF_Write_SectorCount(CompactFlash *device, uint8_t sectorCount) {
+    device->_isSectorCountInvalid = false;
+    device->_sectorCount = sectorCount;
+}
+
+bool CF_Read_Error_InvalidSector(CompactFlash *device) {
+    return device->_isSectorCountInvalid || device->_isSectorCountInvalid;
+}
+
+void CF_Write_Command_ReadSectors(CompactFlash *device) {
+
+}

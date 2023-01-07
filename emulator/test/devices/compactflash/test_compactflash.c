@@ -49,7 +49,93 @@ void test_sectorNumberIsStored(void)
     TEST_ASSERT(CF_Read_SectorNumber(compactFlash) == 0x123456);
 }
 
-// void test_Read_correctNumberOfBytesIsReturned(void)
+void test_dataRequestStatusIsZeroByDefault(void)
+{
+    // arrange
+    CompactFlash* compactFlash = initTest(1);
+
+    // act & assert
+    TEST_ASSERT(CF_Read_Status_DataRequest(compactFlash) == false);
+}
+
+void test_dataRequestStatusIsZeroAfterSettingSectorCount(void)
+{
+    // arrange
+    CompactFlash* compactFlash = initTest(1);
+    CF_Write_SectorCount(compactFlash, 1);
+
+    // act & assert
+    TEST_ASSERT(CF_Read_Status_DataRequest(compactFlash) == false);
+}
+
+void test_dataRequestStatusIsZeroAfterSettingSectorNumber(void)
+{
+    // arrange
+    CompactFlash* compactFlash = initTest(1);
+    CF_Write_SectorNumber(compactFlash, 1);
+
+    // act & assert
+    TEST_ASSERT(CF_Read_Status_DataRequest(compactFlash) == false);
+}
+
+void test_dataRequestStatusIsZeroAfterSettingSectorNumberAndCount(void)
+{
+    // arrange
+    CompactFlash* compactFlash = initTest(1);
+    CF_Write_SectorNumber(compactFlash, 0);
+    CF_Write_SectorCount(compactFlash, 1);
+
+    // act & assert
+    TEST_ASSERT(CF_Read_Status_DataRequest(compactFlash) == false);
+}
+
+void test_errorInvalidSectorIsReadCommandIsSentWithoutSettingSectorNumber(void)
+{
+    // arrange
+    CompactFlash* compactFlash = initTest(1);
+    CF_Write_SectorCount(compactFlash, 1);
+    CF_Write_Command_ReadSectors(compactFlash);
+
+    // act & assert
+    TEST_ASSERT(CF_Read_Error_InvalidSector(compactFlash) == true);
+}
+
+void test_errorInvalidSectorIsReadCommandIsSentWithoutSettingSectorCount(void)
+{
+    // arrange
+    CompactFlash* compactFlash = initTest(1);
+    CF_Write_SectorNumber(compactFlash, 1);
+    CF_Write_Command_ReadSectors(compactFlash);
+
+    // act & assert
+    TEST_ASSERT(CF_Read_Error_InvalidSector(compactFlash) == true);
+}
+
+void test_noErrorInvalidSectorIsReadCommandIsSentWithSectorCountAndNumberSet(void)
+{
+    // arrange
+    CompactFlash* compactFlash = initTest(1);
+    CF_Write_SectorNumber(compactFlash, 1);
+    CF_Write_SectorCount(compactFlash, 1);
+    CF_Write_Command_ReadSectors(compactFlash);
+
+    // act & assert
+    TEST_ASSERT(CF_Read_Error_InvalidSector(compactFlash) == false);
+}
+
+void test_dataIsReadyToBeRead(void)
+{
+    // arrange
+    CompactFlash* compactFlash = initTest(1);
+    CF_Write_SectorNumber(compactFlash, 0);
+    CF_Write_SectorCount(compactFlash, 1);
+    CF_Write_Command_ReadSectors(compactFlash);
+
+    // act & assert
+    TEST_ASSERT(CF_Read_Status_DataRequest(compactFlash) == true);
+}
+
+// void test_correctNumberOfBytesIsReturned(void)
 // {
 //     // arrange
 //     CompactFlash* compactFlash = initTest(1);
@@ -74,6 +160,13 @@ TEST_LIST = {
    { "test_Create_dataIsSet", test_Create_dataIsSet },
    { "test_Destroy_compactFlashIsFreed", test_Destroy_compactFlashIsFreed },
    { "test_sectorNumberIsStored", test_sectorNumberIsStored },
-//    { "test_Read_correctNumberOfBytesIsReturned", test_Read_correctNumberOfBytesIsReturned },
+   { "test_dataRequestStatusIsZeroByDefault", test_dataRequestStatusIsZeroByDefault },
+   { "test_dataRequestStatusIsZeroAfterSettingSectorCount", test_dataRequestStatusIsZeroAfterSettingSectorCount },
+   { "test_dataRequestStatusIsZeroAfterSettingSectorNumber", test_dataRequestStatusIsZeroAfterSettingSectorNumber },
+   { "test_dataRequestStatusIsZeroAfterSettingSectorNumberAndCount", test_dataRequestStatusIsZeroAfterSettingSectorNumberAndCount },
+   { "test_errorInvalidSectorIsReadCommandIsSentWithoutSettingSectorNumber", test_errorInvalidSectorIsReadCommandIsSentWithoutSettingSectorNumber },
+   { "test_errorInvalidSectorIsReadCommandIsSentWithoutSettingSectorCount", test_errorInvalidSectorIsReadCommandIsSentWithoutSettingSectorCount },   
+   { "test_noErrorInvalidSectorIsReadCommandIsSentWithSectorCountAndNumberSet", test_noErrorInvalidSectorIsReadCommandIsSentWithSectorCountAndNumberSet },   
+   { "test_dataIsReadyToBeRead", test_dataIsReadyToBeRead },   
    { NULL, NULL }     /* zeroed record marking the end of the list */
 };

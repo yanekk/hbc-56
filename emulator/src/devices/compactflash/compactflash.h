@@ -24,7 +24,12 @@ typedef struct CompactFlash CompactFlash;
 
 struct CompactFlash {
     const uint8_t * _data;
+    
+    bool _isSectorNumberSet;
     uint32_t _sectorNumber;
+
+    bool _isSectorCountSet;
+    uint8_t _sectorCount;
 };
 
 CompactFlash* CF_Create(const uint8_t * data);
