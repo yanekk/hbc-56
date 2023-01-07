@@ -76,9 +76,11 @@ bool CompactFlash_Read_Error_GeneralError(CompactFlash *device);
 void CompactFlash_Write_SectorCount(CompactFlash *device, uint8_t sectorCount);
 
 uint32_t CompactFlash_Read_SectorNumber(CompactFlash *device);
+
 void CompactFlash_Write_SectorNumber(CompactFlash *device, uint32_t number);
 
-// uint8_t CompactFlash_Write_Command_ReadSector(CompactFlash *device);
+void CompactFlash_Write_Command_ReadSectors(CompactFlash *device);
+
 uint8_t CompactFlash_Read_Data(CompactFlash *device);
 
 void CompactFlash_Destroy(CompactFlash * device);

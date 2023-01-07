@@ -20,6 +20,7 @@ HBC56Device createCompactFlashDevice(uint16_t baseAddr, const uint8_t *contents)
 #define CF_STAT  0x07 // Status (R)
 #define CF_CMD   0x07 // Command (W)
 
+#define CF_Command_ReadSectors 0x20
 #ifdef __cplusplus
 }
 #endif

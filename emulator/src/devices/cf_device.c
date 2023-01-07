@@ -132,5 +132,12 @@ static uint8_t writeCompactFlashDevice(HBC56Device* device, uint16_t addr, uint8
         (CompactFlash_Read_SectorNumber(cfDevice->compactFlash) & 0x00FFFFFF) | (val << 24) & 0x1F000000
       );
     }
+    if(addr == cfDevice->startAddr + CF_CMD) {
+      switch(val) {
+        case CF_Command_ReadSectors:
+        CompactFlash_Write_Command_ReadSectors(cfDevice->compactFlash);
+        return 1;
+      }
+    }
     return 1;
 }

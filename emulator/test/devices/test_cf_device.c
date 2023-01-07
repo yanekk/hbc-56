@@ -28,6 +28,7 @@ typedef struct CompactFlashSpy {
     uint8_t sectorCount;
     uint8_t * data;
     uint8_t dataByte;
+    uint8_t executedCommandCode;
 } CompactFlashSpy;
 
 CompactFlashSpy compactFlashSpy = {};
@@ -105,11 +106,9 @@ void CompactFlash_Write_SectorNumber(CompactFlash *device, uint32_t number) {
     compactFlashSpy.sectorNumber = number;
 }
 
-// uint8_t CompactFlash_Command_ReadSector(CompactFlash *device) {
-//     // LDA #$20                ; Read command
-//     // STA CFCMD			       		;Send read command
-//     return 0;
-// }
+void CompactFlash_Write_Command_ReadSectors(CompactFlash *device) {
+    compactFlashSpy.executedCommandCode = CF_Command_ReadSectors;
+}
 
 uint8_t CompactFlash_Read_Data(CompactFlash *device) {
     return compactFlashSpy.dataByte;
@@ -433,6 +432,17 @@ void test_writeDevice_DATA_dataIsReturned(void)
     TEST_ASSERT(testRead(CF_DATA) == 0xFA);
 }
 
+void test_writeDevice_CMD_ReadSectors(void)
+{
+    // arrange
+    testInit();
+
+    testWrite(CF_CMD, CF_Command_ReadSectors);
+
+    // act & assert
+    TEST_ASSERT(compactFlashSpy.executedCommandCode == CF_Command_ReadSectors);
+}
+
 TEST_LIST = {
    { "test_createDevice_nameIsSet", test_createDevice_nameIsSet },
    { "test_createDevice_cfCardIsCreated", test_createDevice_cfCardIsCreated },
@@ -460,6 +470,7 @@ TEST_LIST = {
    { "test_writeDevice_CFLBA3_bits24_27bitsOfSectorNumberAreSet", test_writeDevice_CFLBA3_bits24_27bitsOfSectorNumberAreSet },
    { "test_writeDevice_CFLBA3_bits24_27OfSectorNumberAreOverwritten", test_writeDevice_CFLBA3_bits24_27OfSectorNumberAreOverwritten },
    { "test_writeDevice_CFLBAX_allBitsAreSet", test_writeDevice_CFLBAX_allBitsAreSet },   
-   { "test_writeDevice_DATA_dataIsReturned", test_writeDevice_DATA_dataIsReturned },   
+   { "test_writeDevice_DATA_dataIsReturned", test_writeDevice_DATA_dataIsReturned },    
+   { "test_writeDevice_CMD_ReadSectors", test_writeDevice_CMD_ReadSectors },   
    { NULL, NULL }     /* zeroed record marking the end of the list */
 };
