@@ -95,7 +95,7 @@ C_OBJECTS = $(TEST_OBJECT_FILE) $(TEST_INCLUDES_OBJECTS)
 $(C_OBJECTS) : obj/%.o : %.c
 	mkdir -p $(dir $@)
 	$(info Compiling $<)
-	$(GCC) -g $(MODULE_CFLAGS) $(CFLAGS_W) $(INCLUDES) -I$(INCLUDE_PATH) -c $< -o $@
+	$(GCC) -g $(MODULE_CFLAGS) $(CFLAGS_W) $(INCLUDES) -I$(INCLUDE_PATH) -c $(subst \,/,$<) -o $@
 
 test: $(TEST_OBJECT_FILE) $(TEST_INCLUDES_OBJECTS)
 	mkdir -p $(dir $(TEST_OBJECT_FILE))

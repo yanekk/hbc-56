@@ -12,16 +12,18 @@
 #ifndef _HBC56_COMPACTFLASH_H_
 #define _HBC56_COMPACTFLASH_H_
 
-
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#include <stdint.h>
+#include <stdbool.h>
 
 struct CompactFlash;
 typedef struct CompactFlash CompactFlash;
 
 struct CompactFlash {
-    uint8_t * _data;
+    const uint8_t * _data;
 };
 
 CompactFlash* CF_Create(const uint8_t * data);
