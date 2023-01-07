@@ -223,6 +223,42 @@ void test_receivingAllBytesInMultipleSectorsUnsetsDataRequestStatus(void)
     TEST_ASSERT(CF_Read_Status_DataRequest(compactFlash) == false);
 }
 
+void test_notEmulatedStatusBitsHaveAlwaysDefaultValues(void)
+{
+    // arrange
+    CompactFlash* compactFlash = initTest(1);
+
+    // act & assert
+    TEST_ASSERT(CF_Read_Status_Busy(compactFlash) == false);
+    TEST_ASSERT(CF_Read_Status_Ready(compactFlash) == true);
+    TEST_ASSERT(CF_Read_Status_DriveWriteFault(compactFlash) == false);
+    TEST_ASSERT(CF_Read_Status_MemoryCardReady(compactFlash) == true);
+    TEST_ASSERT(CF_Read_Status_CorrectableDataError(compactFlash) == false);
+}
+
+void test_notEmulatedErrorBitsHaveAlwaysDefaultValues(void)
+{
+    // arrange
+    CompactFlash* compactFlash = initTest(1);
+
+    // act & assert
+    TEST_ASSERT(CF_Read_Status_Error(compactFlash) == false);
+    TEST_ASSERT(CF_Read_Error_BadBlock(compactFlash) == false);
+    TEST_ASSERT(CF_Read_Error_UncorrectableError(compactFlash) == false);
+    TEST_ASSERT(CF_Read_Error_InvalidCommand(compactFlash) == false);
+    TEST_ASSERT(CF_Read_Error_GeneralError(compactFlash) == false);
+}
+/*
+TODO:
+  LDA #$04      ; Reset
+  STA CFCMD
+
+  LDA #$01      ; LD features register to enable 8 bit
+  STA CFFEAT
+  
+  LDA #$EF      ; Send set features command
+  STA CFCMD
+*/
 TEST_LIST = {
    { "test_Create_dataIsSet", test_Create_dataIsSet },
    { "test_Destroy_compactFlashIsFreed", test_Destroy_compactFlashIsFreed },
@@ -241,5 +277,7 @@ TEST_LIST = {
    { "test_receivingAllBytesInFirstSectorUnsetsDataRequestStatus", test_receivingAllBytesInFirstSectorUnsetsDataRequestStatus },  
    { "test_receivingAllBytesInSecondSectorUnsetsDataRequestStatus", test_receivingAllBytesInSecondSectorUnsetsDataRequestStatus },  
    { "test_receivingAllBytesInMultipleSectorsUnsetsDataRequestStatus", test_receivingAllBytesInMultipleSectorsUnsetsDataRequestStatus },  
+   { "test_notEmulatedStatusBitsHaveAlwaysDefaultValues", test_notEmulatedStatusBitsHaveAlwaysDefaultValues },  
+   { "test_notEmulatedErrorBitsHaveAlwaysDefaultValues", test_notEmulatedErrorBitsHaveAlwaysDefaultValues },  
    { NULL, NULL }     /* zeroed record marking the end of the list */
 };

@@ -73,3 +73,43 @@ uint8_t CF_Read_Data(CompactFlash *device) {
     }
     return data;
 }
+
+bool CF_Read_Status_Busy(CompactFlash *device) {
+    return false;
+}
+
+bool CF_Read_Status_Ready(CompactFlash *device) {
+    return true;
+}
+
+bool CF_Read_Status_DriveWriteFault(CompactFlash *device) {
+    return false;
+}
+
+bool CF_Read_Status_MemoryCardReady(CompactFlash *device) {
+    return true;
+}
+
+bool CF_Read_Status_CorrectableDataError(CompactFlash *device) {
+    return false;
+}
+
+bool CF_Read_Status_Error(CompactFlash *device) {
+    return false;
+}
+
+bool CF_Read_Error_BadBlock(CompactFlash *device) {
+    return false;
+}
+
+bool CF_Read_Error_UncorrectableError(CompactFlash *device) {
+    return false;
+}
+
+bool CF_Read_Error_InvalidCommand(CompactFlash *device) {
+    return false;
+}
+
+bool CF_Read_Error_GeneralError(CompactFlash *device) {
+    return false;
+}
