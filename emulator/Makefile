@@ -104,3 +104,6 @@ test: $(TEST_OBJECT_FILE) $(TEST_INCLUDES_OBJECTS)
 	$(GPP) -g $(CFLAGS_W) $(TEST_OBJECT_FILE) $(TEST_INCLUDES_OBJECTS) -o $(BIN_DIR)/run_tests
 	$(BIN_DIR)/run_tests.exe
 endif
+
+run:
+	.\bin\hbc56emu.exe --rom H:\src\my-6502\bin\bios.bin --brk

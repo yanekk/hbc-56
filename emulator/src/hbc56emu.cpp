@@ -33,6 +33,7 @@
 #include "devices/ay38910_device.h"
 #include "devices/uart_device.h"
 #include "devices/cf_device.h"
+#include "parseargs.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -929,83 +930,30 @@ int main(int argc, char* argv[])
   /* initialise the debugger */
   debuggerInit(getCpuDevice(cpuDevice));
 
-  int romLoaded = 0;
-  LCDType lcdType = LCD_GRAPHICS;
-
+  Hbc56EmulatorArgs args = {0};
+  args.lcdType = LCD_GRAPHICS;
 #if __EMSCRIPTEN__
   /* load the hard-coded rom */
   romLoaded = loadRom("rom.bin");
   lcdType = LCD_GRAPHICS;
 #endif
-  int doBreak = 0;
 
-  /* parse arguments */
-  for (int i = 1; i < argc;)
-  {
-    int consumed;
-
-    consumed = 0;//SDLCommonArg(state, i);
-    if (consumed <= 0)
-    {
-      consumed = -1;
-      if (SDL_strcasecmp(argv[i], "--rom") == 0)
-      {
-        if (argv[i + 1])
-        {
-          consumed = 1;
-          romLoaded = loadRom(argv[++i]);
-        }
-      }
-      /* start paused? */
-      else if (SDL_strcasecmp(argv[i], "--brk") == 0)
-      {
-        consumed = 1;
-        doBreak = 1;
-      }
-      /* enable the lcd? */
-      else if (SDL_strcasecmp(argv[i], "--lcd") == 0)
-      {
-        if (argv[i + 1])
-        {
-          consumed = 1;
-          switch (atoi(argv[i + 1]))
-          {
-          case 1602:
-            lcdType = LCD_1602;
-            break;
-          case 2004:
-            lcdType = LCD_2004;
-            break;
-          case 12864:
-            lcdType = LCD_GRAPHICS;
-            break;
-          }
-          ++i;
-        }
-      }
-    }
-    if (consumed < 0)
-    {
-      static const char* options[] = { "--rom <romfile>","[--brk]","[--keyboard]", NULL };
-      //SDLCommonLogUsage(state, argv[0], options);
-      return 2;
-    }
-    i += consumed;
+  if(!Hbc56EmulatorArgs_Parse(&args, argc, argv)) {
+    printf("Error parsing arguments.");
+    return 1;
   }
-
-  if (romLoaded == 0)
-  {
-    static const char* options[] = { "--rom <romfile>","[--brk]","[--keyboard]","[--lcd 1602|2004|12864]", NULL };
-    //SDLCommonLogUsage(state, argv[0], options);
+  
+  if (!args.romFile) {
+    char const *missingRomErrorMessage = "No HBC-56 ROM file.\n\nUse --rom <romfile>";
+    printf(missingRomErrorMessage);
 
 #ifndef __EMSCRIPTEN__
-    SDL_snprintf(tempBuffer, sizeof(tempBuffer), "No HBC-56 ROM file.\n\nUse --rom <romfile>");
+    SDL_snprintf(tempBuffer, sizeof(tempBuffer), missingRomErrorMessage);
     SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Troy's HBC-56 Emulator", tempBuffer, NULL);
 #endif
-
     return 2;
   }
-
+  loadRom(args.romFile);
   /* randomise */
   srand((unsigned int)time(NULL));
 
@@ -1027,10 +975,7 @@ int main(int argc, char* argv[])
 #endif
 
 #if HBC56_HAVE_LCD
-  //if (lcdType != LCD_NONE)
-  {
-    hbc56AddDevice(createLcdDevice(lcdType, HBC56_IO_ADDRESS(HBC56_LCD_DAT_PORT), HBC56_IO_ADDRESS(HBC56_LCD_CMD_PORT), renderer));
-  }
+  hbc56AddDevice(createLcdDevice(args.lcdType, HBC56_IO_ADDRESS(HBC56_LCD_DAT_PORT), HBC56_IO_ADDRESS(HBC56_LCD_CMD_PORT), renderer));
 #endif
 
   /* initialise audio */
@@ -1054,7 +999,9 @@ int main(int argc, char* argv[])
   /* reset the machine */
   hbc56Reset();
 
-  if (doBreak)hbc56DebugBreak();
+  if (args.breakOnStart) {
+    hbc56DebugBreak();
+  }
 
   SDL_Delay(100);
 

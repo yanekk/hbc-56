@@ -166,6 +166,19 @@ void test_errorOnLcdTypeOptionAtTheEnd(void)
     TEST_ASSERT(!ok);
 }
 
+void test_noErrorOnEmptyArray(void)
+{
+    // arrange
+    Hbc56EmulatorArgs args = {0};
+    char* argv[] = {0};
+
+    // act
+    bool ok = Hbc56EmulatorArgs_Parse(&args, 0, argv);
+
+    // assert
+    TEST_ASSERT(ok);
+}
+
 TEST_LIST = {
    { "test_parsingFailsOnMissingArgv", test_parsingFailsOnMissingArgv },
    { "test_parsingSucceededOnPassedArgs", test_parsingSucceededOnPassedArgs },
@@ -178,5 +191,6 @@ TEST_LIST = {
    { "test_lcdTypeIsGraphicsWhenSet", test_lcdTypeIsGraphicsWhenSet },
    { "test_errorIfLcdTypeIsUnknown", test_errorIfLcdTypeIsUnknown },
    { "test_errorOnLcdTypeOptionAtTheEnd", test_errorOnLcdTypeOptionAtTheEnd },
+   { "test_noErrorOnEmptyArray", test_noErrorOnEmptyArray },
    { NULL, NULL }     /* zeroed record marking the end of the list */
 };
