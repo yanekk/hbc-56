@@ -7,16 +7,13 @@
 int doBreak = 0;
 
 
-Hbc56EmulatorArgs* Hbc56EmulatorArgs_Parse(int argc, char* argv[]) {
+bool Hbc56EmulatorArgs_Parse(Hbc56EmulatorArgs* args, int argc, char* argv[]) {
     if (argv == NULL) {
         return NULL;
     }
-    Hbc56EmulatorArgs* args = malloc(sizeof(Hbc56EmulatorArgs));
-
     for(uint8_t i = 0; i < argc; i++) {
         if(strcmp("--rom", argv[i]) == 0) {
-            args->romFile = malloc(strlen(argv[++i])+1);
-            args->romFile = strcpy(args->romFile, argv[i]);
+            args->romFile = argv[++i];
         }
     }
     return args;

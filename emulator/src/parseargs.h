@@ -11,7 +11,7 @@ typedef struct {
     char* romFile;
 } Hbc56EmulatorArgs;
 
-Hbc56EmulatorArgs* Hbc56EmulatorArgs_Parse(int argc, char* argv[]);
+bool Hbc56EmulatorArgs_Parse(Hbc56EmulatorArgs* args, int argc, char* argv[]);
 
 #ifdef __cplusplus
 }
