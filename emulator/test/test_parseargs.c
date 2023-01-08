@@ -41,7 +41,7 @@ void test_parsingRomFile(void)
     TEST_ASSERT(ok);
     TEST_ASSERT(strcmp(args.romFile, romFile) == 0);
 }
-// TODO: destroy arg pointer
+
 TEST_LIST = {
    { "test_parsingFailsOnMissingArgv", test_parsingFailsOnMissingArgv },
    { "test_parsingSucceededOnPassedArgs", test_parsingSucceededOnPassedArgs },
