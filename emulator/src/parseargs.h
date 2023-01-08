@@ -14,7 +14,7 @@ typedef struct {
     LCDType lcdType;
 } Hbc56EmulatorArgs;
 
-bool Hbc56EmulatorArgs_Parse(Hbc56EmulatorArgs* args, int argc, char* argv[]);
+bool Hbc56EmulatorArgs_Parse(Hbc56EmulatorArgs* args, int argc, char* argv[], char errorBuffer[]);
 
 #ifdef __cplusplus
 }
