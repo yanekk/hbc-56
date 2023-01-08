@@ -8,10 +8,10 @@ extern "C" {
 #include <stdbool.h>
 
 typedef struct {
-
+    char* romFile;
 } Hbc56EmulatorArgs;
 
-bool Hbc56EmulatorArgs_Parse(int argc, char* argv[], const Hbc56EmulatorArgs* args);
+Hbc56EmulatorArgs* Hbc56EmulatorArgs_Parse(int argc, char* argv[]);
 
 #ifdef __cplusplus
 }
