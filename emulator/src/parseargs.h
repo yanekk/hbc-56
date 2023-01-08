@@ -6,10 +6,12 @@ extern "C" {
 #endif
 
 #include <stdbool.h>
+#include "devices/lcd_device.h"
 
 typedef struct {
     char* romFile;
     bool breakOnStart;
+    LCDType lcdType;
 } Hbc56EmulatorArgs;
 
 bool Hbc56EmulatorArgs_Parse(Hbc56EmulatorArgs* args, int argc, char* argv[]);
