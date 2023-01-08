@@ -36,7 +36,7 @@ CPP_SOURCES = $(wildcard $(SRC_DIR)/*.cpp) $(wildcard $(SRC_DIR)/**/*.cpp) \
 	thirdparty/imgui/backends/imgui_impl_sdlrenderer.cpp	
 CPP_OBJECTS := $(CPP_SOURCES:%.cpp=$(OBJ_DIR)/%.o)
 
-C_SOURCES = $(wildcard $(SRC_DIR)/*.c) $(wildcard $(SRC_DIR)/**/*.c) \
+C_SOURCES = $(wildcard $(SRC_DIR)/*.c) $(wildcard $(SRC_DIR)/**/*.c) $(wildcard $(SRC_DIR)/**/**/*.c) \
 	thirdparty/emu2149/emu2149.c \
 	modules/65c02/src/vrEmu6502.c \
 	modules/lcd/src/vrEmuLcd.c \

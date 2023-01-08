@@ -3,7 +3,7 @@
 #include <stdlib.h>
 
 CompactFlash* initTest(uint8_t sectorCount) {
-    uint16_t dataSize = 512 * sectorCount;
+    uint16_t dataSize = SECTOR_SIZE * (sectorCount+1);
     uint8_t* data = malloc(sizeof(uint8_t) * dataSize);
 
     for(uint16_t i = 0; i < dataSize; i++) {
@@ -144,7 +144,20 @@ void test_firstByteIsReceivedForFirstSector(void)
     CF_Write_Command_ReadSectors(compactFlash);
 
     // act & assert
-    TEST_ASSERT(CF_Read_Data(compactFlash) == compactFlash->_data[0]);
+    TEST_ASSERT(CF_Read_Data(compactFlash, false) == compactFlash->_data[0]);
+}
+
+void test_firstByteIsReceivedForFirstSector_noIncrementInDebugMode(void)
+{
+    // arrange
+    CompactFlash* compactFlash = initTest(1);
+    CF_Write_SectorNumber(compactFlash, 0);
+    CF_Write_SectorCount(compactFlash, 1);
+    CF_Write_Command_ReadSectors(compactFlash);
+    CF_Read_Data(compactFlash, true);
+
+    // act & assert
+    TEST_ASSERT(CF_Read_Data(compactFlash, true) == compactFlash->_data[0]);
 }
 
 void test_secondByteIsReceivedForFirstSector(void)
@@ -154,22 +167,22 @@ void test_secondByteIsReceivedForFirstSector(void)
     CF_Write_SectorNumber(compactFlash, 0);
     CF_Write_SectorCount(compactFlash, 1);
     CF_Write_Command_ReadSectors(compactFlash);
-    CF_Read_Data(compactFlash); // read first byte
+    CF_Read_Data(compactFlash, false); // read first byte
 
     // act & assert
-    TEST_ASSERT(CF_Read_Data(compactFlash) == compactFlash->_data[1]);
+    TEST_ASSERT(CF_Read_Data(compactFlash, false) == compactFlash->_data[1]);
 }
 
 void test_firstByteIsReceivedForSecondSector(void)
 {
     // arrange
-    CompactFlash* compactFlash = initTest(1);
+    CompactFlash* compactFlash = initTest(2);
     CF_Write_SectorNumber(compactFlash, 1);
     CF_Write_SectorCount(compactFlash, 1);
     CF_Write_Command_ReadSectors(compactFlash);
 
     // act & assert
-    TEST_ASSERT(CF_Read_Data(compactFlash) == compactFlash->_data[SECTOR_SIZE]);
+    TEST_ASSERT(CF_Read_Data(compactFlash, false) == compactFlash->_data[SECTOR_SIZE]);
 }
 
 void test_receivingAllBytesInFirstSectorUnsetsDataRequestStatus(void)
@@ -182,44 +195,44 @@ void test_receivingAllBytesInFirstSectorUnsetsDataRequestStatus(void)
 
     // act & assert
     for(uint16_t i = 0; i < SECTOR_SIZE-1; i++) {
-        CF_Read_Data(compactFlash);
+        CF_Read_Data(compactFlash, false);
         TEST_ASSERT(CF_Read_Status_DataRequest(compactFlash) == true);
     }
-    CF_Read_Data(compactFlash);
+    CF_Read_Data(compactFlash, false);
     TEST_ASSERT(CF_Read_Status_DataRequest(compactFlash) == false);
 }
 
 void test_receivingAllBytesInSecondSectorUnsetsDataRequestStatus(void)
 {
     // arrange
-    CompactFlash* compactFlash = initTest(1);
+    CompactFlash* compactFlash = initTest(2);
     CF_Write_SectorNumber(compactFlash, 1);
     CF_Write_SectorCount(compactFlash, 1);
     CF_Write_Command_ReadSectors(compactFlash);
 
     // act & assert
     for(uint16_t i = 0; i < SECTOR_SIZE-1; i++) {
-        CF_Read_Data(compactFlash);
+        CF_Read_Data(compactFlash, false);
         TEST_ASSERT(CF_Read_Status_DataRequest(compactFlash) == true);
     }
-    CF_Read_Data(compactFlash);
+    CF_Read_Data(compactFlash, false);
     TEST_ASSERT(CF_Read_Status_DataRequest(compactFlash) == false);
 }
 
 void test_receivingAllBytesInMultipleSectorsUnsetsDataRequestStatus(void)
 {
     // arrange
-    CompactFlash* compactFlash = initTest(1);
+    CompactFlash* compactFlash = initTest(3);
     CF_Write_SectorNumber(compactFlash, 1);
     CF_Write_SectorCount(compactFlash, 2);
     CF_Write_Command_ReadSectors(compactFlash);
 
     // act & assert
     for(uint16_t i = 0; i < SECTOR_SIZE * 2 - 1; i++) {
-        CF_Read_Data(compactFlash);
+        CF_Read_Data(compactFlash, false);
         TEST_ASSERT(CF_Read_Status_DataRequest(compactFlash) == true);
     }
-    CF_Read_Data(compactFlash);
+    CF_Read_Data(compactFlash, false);
     TEST_ASSERT(CF_Read_Status_DataRequest(compactFlash) == false);
 }
 
@@ -272,6 +285,7 @@ TEST_LIST = {
    { "test_noErrorInvalidSectorIsReadCommandIsSentWithSectorCountAndNumberSet", test_noErrorInvalidSectorIsReadCommandIsSentWithSectorCountAndNumberSet },   
    { "test_dataIsReadyToBeRead", test_dataIsReadyToBeRead },   
    { "test_firstByteIsReceivedForFirstSector", test_firstByteIsReceivedForFirstSector },  
+   { "test_firstByteIsReceivedForFirstSector_noIncrementInDebugMode", test_firstByteIsReceivedForFirstSector_noIncrementInDebugMode },  
    { "test_secondByteIsReceivedForFirstSector", test_secondByteIsReceivedForFirstSector },  
    { "test_firstByteIsReceivedForSecondSector", test_firstByteIsReceivedForSecondSector },  
    { "test_receivingAllBytesInFirstSectorUnsetsDataRequestStatus", test_receivingAllBytesInFirstSectorUnsetsDataRequestStatus },  

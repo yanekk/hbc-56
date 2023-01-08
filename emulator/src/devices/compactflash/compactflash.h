@@ -95,7 +95,7 @@ void CF_Write_SectorNumber(CompactFlash *device, uint32_t number);
 
 void CF_Write_Command_ReadSectors(CompactFlash *device);
 
-uint8_t CF_Read_Data(CompactFlash *device);
+uint8_t CF_Read_Data(CompactFlash *device, bool isDebug);
 
 void CF_Destroy(CompactFlash * device);
 

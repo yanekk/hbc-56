@@ -66,8 +66,11 @@ void CF_Write_Command_ReadSectors(CompactFlash *device) {
     device->_dataEnd = device->_dataIndex + device->_sectorCount * SECTOR_SIZE;
 }
 
-uint8_t CF_Read_Data(CompactFlash *device) {
-    uint8_t data = device->_data[device->_dataIndex++];
+uint8_t CF_Read_Data(CompactFlash *device, bool isDebug) {
+    uint8_t data = device->_data[device->_dataIndex];
+    if(!isDebug) {
+        device->_dataIndex++;
+    }
     if(device->_dataIndex == device->_dataEnd) {
         device->_hasDataRequest = false;
     }

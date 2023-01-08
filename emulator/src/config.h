@@ -25,6 +25,8 @@
 /* memory map configuration values 
   -------------------------------------------------------------------------- */
 #define HBC56_RAM_START         0x0000
+#define HBC56_RAM_ZEROPAGE_SIZE 0x0100
+#define HBC56_RAM_STACK_SIZE    0x0100
 #define HBC56_RAM_SIZE          0x3E00
 
 #define HBC56_ROM_START         0x8000
@@ -71,7 +73,7 @@
 
 /* computed configuration values (shouldn't need to touch these) 
   -------------------------------------------------------------------------- */
-#define HBC56_RAM_END           (HBC56_RAM_START + HBC56_RAM_SIZE) /* one past end */
+#define HBC56_RAM_END           (HBC56_RAM_START + HBC56_RAM_ZEROPAGE_SIZE + HBC56_RAM_STACK_SIZE + HBC56_RAM_SIZE) /* one past end */
 #define HBC56_ROM_END           (HBC56_ROM_START + HBC56_ROM_SIZE) /* one past end */
 #define HBC56_RAM_MASK          ~HBC56_RAM_START
 #define HBC56_ROM_MASK          ~HBC56_ROM_START

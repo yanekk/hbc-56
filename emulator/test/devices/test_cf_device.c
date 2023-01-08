@@ -28,6 +28,7 @@ typedef struct CompactFlashSpy {
     uint8_t sectorCount;
     uint8_t * data;
     uint8_t dataByte;
+    bool isDebugger;
     uint8_t executedCommandCode;
 } CompactFlashSpy;
 
@@ -110,7 +111,8 @@ void CF_Write_Command_ReadSectors(CompactFlash *device) {
     compactFlashSpy.executedCommandCode = CF_Command_ReadSectors;
 }
 
-uint8_t CF_Read_Data(CompactFlash *device) {
+uint8_t CF_Read_Data(CompactFlash *device, bool isDebugger) {
+    compactFlashSpy.isDebugger = isDebugger;
     return compactFlashSpy.dataByte;
 }
 
@@ -122,7 +124,7 @@ void testInit() {
 
 uint8_t testRead(uint8_t offset) {
     uint8_t value = 0;
-    readDevice(&testDevice, BASE_ADDRESS + offset, &value, 0);
+    readDevice(&testDevice, BASE_ADDRESS + offset, &value, true);
     return value;
 }
 
@@ -430,6 +432,17 @@ void test_writeDevice_DATA_dataIsReturned(void)
     
     // act & assert
     TEST_ASSERT(testRead(CF_DATA) == 0xFA);
+}
+
+void test_writeDevice_DATA_debugFlagIsPased(void)
+{
+    // arrange
+    testInit();
+    compactFlashSpy.dataByte = 0xFA;
+    testRead(CF_DATA);
+
+    // act & assert
+    TEST_ASSERT(compactFlashSpy.isDebugger == true);
 }
 
 void test_writeDevice_CMD_ReadSectors(void)
