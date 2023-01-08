@@ -938,21 +938,17 @@ int main(int argc, char* argv[])
   lcdType = LCD_GRAPHICS;
 #endif
 
-  if(!Hbc56EmulatorArgs_Parse(&args, argc, argv)) {
-    printf("Error parsing arguments.");
+  char errorBuffer[512] = {0};
+  if(!Hbc56EmulatorArgs_Parse(&args, argc, argv, errorBuffer)) {
+    printf("Error parsing arguments: %s", errorBuffer);
+
+#ifndef __EMSCRIPTEN__
+    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Troy's HBC-56 Emulator", errorBuffer, NULL);
+#endif
+
     return 1;
   }
   
-  if (!args.romFile) {
-    char const *missingRomErrorMessage = "No HBC-56 ROM file.\n\nUse --rom <romfile>";
-    printf(missingRomErrorMessage);
-
-#ifndef __EMSCRIPTEN__
-    SDL_snprintf(tempBuffer, sizeof(tempBuffer), missingRomErrorMessage);
-    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Troy's HBC-56 Emulator", tempBuffer, NULL);
-#endif
-    return 2;
-  }
   loadRom(args.romFile);
   /* randomise */
   srand((unsigned int)time(NULL));

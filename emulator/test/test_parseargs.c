@@ -5,7 +5,7 @@
 #include <stdbool.h>
 #include <string.h>
 
-#define EXISTING_ROM_FILE "test/test_parseargs_data/existing_rom_file.bin"
+#define EXISTING_ROM_FILE "test/test_parseargs_data/correct_size_rom_file.bin"
 
 char errorBuffer[1024];
 
@@ -64,6 +64,22 @@ void test_parsingRomFileErrorOnNonExistingFile(void)
     TEST_ASSERT(!ok);
     TEST_ASSERT(args.romFile == NULL);
     TEST_ASSERT(strcmp(errorBuffer, "File 'test/test_parseargs_data/non_existing_file.txt' cannot be found.") == 0);
+}
+
+void test_parsingRomFileErrorOnIncorrectFileSize(void)
+{
+    // arrange
+    Hbc56EmulatorArgs args = {0};
+    char* romFile = "test/test_parseargs_data/incorrect_size_rom_file.bin";
+    char* argv[] = {"--rom", romFile};
+
+    // act
+    bool ok = Hbc56EmulatorArgs_Parse(&args, 2, argv, errorBuffer);
+
+    // assert
+    TEST_ASSERT(!ok);
+    TEST_ASSERT(args.romFile == NULL);
+    TEST_ASSERT(strcmp(errorBuffer, "File 'test/test_parseargs_data/incorrect_size_rom_file.bin' has incorrect size. Expected: 32768, got 16384.") == 0);
 }
 
 void test_errorOnRomOptionAtTheEnd(void)
@@ -198,6 +214,7 @@ TEST_LIST = {
     { "test_parsingRomFileNoErrorOnMissingRomOption", test_parsingRomFileNoErrorOnMissingRomOption },
     { "test_parsingRomFileNoErrorOnExistingFile", test_parsingRomFileNoErrorOnExistingFile },
     { "test_parsingRomFileErrorOnNonExistingFile", test_parsingRomFileErrorOnNonExistingFile },
+    { "test_parsingRomFileErrorOnIncorrectFileSize", test_parsingRomFileErrorOnIncorrectFileSize },
     { "test_errorOnRomOptionAtTheEnd", test_errorOnRomOptionAtTheEnd },
     { "test_breakOnStartIsFalseByDefault", test_breakOnStartIsFalseByDefault },
     { "test_breakOnStartIsTrueWhenSet", test_breakOnStartIsTrueWhenSet },
