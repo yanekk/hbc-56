@@ -79,7 +79,7 @@ void test_parsingRomFileErrorOnIncorrectFileSize(void)
     // assert
     TEST_ASSERT(!ok);
     TEST_ASSERT(args.romFile == NULL);
-    TEST_ASSERT(strcmp(errorBuffer, "File 'test/test_parseargs_data/incorrect_size_rom_file.bin' has incorrect size. Expected: 32768, got 16384.") == 0);
+    TEST_ASSERT(strcmp(errorBuffer, "ROM file 'test/test_parseargs_data/incorrect_size_rom_file.bin' has incorrect size. Expected: 32768, got 16384.") == 0);
 }
 
 void test_errorOnRomOptionAtTheEnd(void)

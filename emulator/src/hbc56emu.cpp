@@ -51,7 +51,6 @@ static int deviceCount = 0;
 static HBC56Device* cpuDevice = NULL;
 static HBC56Device* romDevice = NULL;
 
-static char tempBuffer[256];
 
 #define MAX_IRQS 5
 static HBC56InterruptSignal irqs[MAX_IRQS];
@@ -152,30 +151,19 @@ void hbc56Interrupt(uint8_t irq, HBC56InterruptSignal signal)
 int hbc56LoadRom(const uint8_t* romData, int romDataSize)
 {
   int status = 1;
+  
+  debug6502State(cpuDevice, CPU_BREAK);
 
-  if (romDataSize != HBC56_ROM_SIZE)
+  SDL_Delay(1);
+  if (!romDevice)
   {
-#ifndef __EMSCRIPTEN__
-    SDL_snprintf(tempBuffer, sizeof(tempBuffer), "Error. ROM file must be %d bytes.", HBC56_ROM_SIZE);
-    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Troy's HBC-56 Emulator", tempBuffer, NULL);
-#endif
-    status = 0;
+    romDevice = hbc56AddDevice(createRomDevice(HBC56_ROM_START, HBC56_ROM_END, romData));
   }
-
-  if (status)
+  else
   {
-    debug6502State(cpuDevice, CPU_BREAK);
-    SDL_Delay(1);
-    if (!romDevice)
-    {
-      romDevice = hbc56AddDevice(createRomDevice(HBC56_ROM_START, HBC56_ROM_END, romData));
-    }
-    else
-    {
-      status = setMemoryDeviceContents(romDevice, romData, romDataSize);
-    }
-    hbc56Reset();
+    status = setMemoryDeviceContents(romDevice, romData, romDataSize);
   }
+  hbc56Reset();
   return status;
 }
 
@@ -768,77 +756,69 @@ static int loadRom(const char* filename)
 #else
   fopen_s(&ptr, filename, "rb");
 #endif
-  SDL_snprintf(tempBuffer, sizeof(tempBuffer), "Troy's HBC-56 Emulator - %s", filename);
-  //state->window_title = tempBuffer;
 
-  if (ptr)
+  if (!ptr)
   {
-    uint8_t rom[HBC56_ROM_SIZE];
-    size_t romBytesRead = fread(rom, 1, sizeof(rom), ptr);
-    fclose(ptr);
-
-    romLoaded = hbc56LoadRom(rom, (int)romBytesRead);
-
-    if (romLoaded)
-    {
-      SDL_strlcpy(labelMapFile, filename, FILENAME_MAX);
-      
-      size_t ln = SDL_strlen(labelMapFile);
-      SDL_strlcpy(labelMapFile + ln, ".lmap", FILENAME_MAX - ln);
-
-#ifdef __EMSCRIPTEN__
-      ptr = fopen(labelMapFile, "rb");
-#else
-      fopen_s(&ptr, labelMapFile, "rb");
-#endif
-      if (ptr)
-      {
-
-        fseek(ptr, 0, SEEK_END);
-        long fsize = ftell(ptr);
-        fseek(ptr, 0, SEEK_SET);  /* same as rewind(f); */
-
-        char *lblFileContent = (char*)malloc(fsize + 1);
-        fread(lblFileContent, fsize, 1, ptr);
-        lblFileContent[fsize] = 0;
-        fclose(ptr);
-
-        hbc56LoadLabels(lblFileContent);
-        free(lblFileContent);
-      }
-
-      SDL_strlcpy(labelMapFile, filename, FILENAME_MAX);
-      ln = SDL_strlen(labelMapFile);
-      SDL_strlcpy(labelMapFile + ln, ".rpt", FILENAME_MAX - ln);
-
-#ifdef __EMSCRIPTEN__
-      ptr = fopen(labelMapFile, "rb");
-#else
-      fopen_s(&ptr, labelMapFile, "rb");
-#endif
-      if (ptr)
-      {
-        fseek(ptr, 0, SEEK_END);
-        long fsize = ftell(ptr);
-        fseek(ptr, 0, SEEK_SET);  /* same as rewind(f); */
-
-        char* lblFileContent = (char*)malloc(fsize + 1);
-        fread(lblFileContent, fsize, 1, ptr);
-        lblFileContent[fsize] = 0;
-        fclose(ptr);
-
-        hbc56LoadSource(lblFileContent);
-        free(lblFileContent);
-      }
-    }
-  }
-  else
-  {
-#ifndef __EMSCRIPTEN__
-    SDL_snprintf(tempBuffer, sizeof(tempBuffer), "Error. ROM file '%s' does not exist.", filename);
-    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Troy's HBC-56 Emulator", tempBuffer, NULL);
-#endif
     return 2;
+  }
+
+  uint8_t rom[HBC56_ROM_SIZE];
+  size_t romBytesRead = fread(rom, 1, sizeof(rom), ptr);
+  fclose(ptr);
+
+  romLoaded = hbc56LoadRom(rom, (int)romBytesRead);
+
+  if (romLoaded)
+  {
+    SDL_strlcpy(labelMapFile, filename, FILENAME_MAX);
+    
+    size_t ln = SDL_strlen(labelMapFile);
+    SDL_strlcpy(labelMapFile + ln, ".lmap", FILENAME_MAX - ln);
+
+#ifdef __EMSCRIPTEN__
+    ptr = fopen(labelMapFile, "rb");
+#else
+    fopen_s(&ptr, labelMapFile, "rb");
+#endif
+    if (ptr)
+    {
+
+      fseek(ptr, 0, SEEK_END);
+      long fsize = ftell(ptr);
+      fseek(ptr, 0, SEEK_SET);  /* same as rewind(f); */
+
+      char *lblFileContent = (char*)malloc(fsize + 1);
+      fread(lblFileContent, fsize, 1, ptr);
+      lblFileContent[fsize] = 0;
+      fclose(ptr);
+
+      hbc56LoadLabels(lblFileContent);
+      free(lblFileContent);
+    }
+
+    SDL_strlcpy(labelMapFile, filename, FILENAME_MAX);
+    ln = SDL_strlen(labelMapFile);
+    SDL_strlcpy(labelMapFile + ln, ".rpt", FILENAME_MAX - ln);
+
+#ifdef __EMSCRIPTEN__
+    ptr = fopen(labelMapFile, "rb");
+#else
+    fopen_s(&ptr, labelMapFile, "rb");
+#endif
+    if (ptr)
+    {
+      fseek(ptr, 0, SEEK_END);
+      long fsize = ftell(ptr);
+      fseek(ptr, 0, SEEK_SET);  /* same as rewind(f); */
+
+      char* lblFileContent = (char*)malloc(fsize + 1);
+      fread(lblFileContent, fsize, 1, ptr);
+      lblFileContent[fsize] = 0;
+      fclose(ptr);
+
+      hbc56LoadSource(lblFileContent);
+      free(lblFileContent);
+    }
   }
 
   return romLoaded;
@@ -914,15 +894,10 @@ int main(int argc, char* argv[])
   ImGui_ImplSDL2_InitForSDLRenderer(window, renderer);
   ImGui_ImplSDLRenderer_Init(renderer);
 
-
   perfFreq = (double)SDL_GetPerformanceFrequency();
 
   /* enable standard application logging */
   SDL_LogSetPriority(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_INFO);
-
-  /* window title */
-//  SDL_snprintf(tempBuffer, sizeof(tempBuffer), "Troy's HBC-56 Emulator");
-//  state->window_title = tempBuffer;
 
   /* add the cpu device */
   cpuDevice = hbc56AddDevice(create6502CpuDevice(debuggerIsBreakpoint));

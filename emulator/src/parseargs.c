@@ -16,7 +16,7 @@
 #define ERROR_FILE_NOT_FOUND "File '%s' cannot be found."
 #define ERROR_UNKNOWN_LCD_TYPE "Unknown LCD type: %s"
 #define ERROR_NO_LCD_TYPE_SET "No LCD type set"
-#define ERROR_INCORRECT_FILE_SIZE "File '%s' has incorrect size. Expected: %d, got %ld."
+#define ERROR_INCORRECT_FILE_SIZE "ROM file '%s' has incorrect size. Expected: %d, got %ld."
 
 bool Hbc56EmulatorArgs_Parse(Hbc56EmulatorArgs* args, int argc, char* argv[], char errorBuffer[]) {
     if (argv == NULL) {
@@ -34,19 +34,21 @@ bool Hbc56EmulatorArgs_Parse(Hbc56EmulatorArgs* args, int argc, char* argv[], ch
             char* romFilePath = argv[i];
 
             FILE* filePtr = fopen(romFilePath, "r");
-            if(filePtr) {
-                fseek(filePtr, 0, SEEK_END);
-                if(ftell(filePtr) != HBC56_ROM_SIZE) {
-                    sprintf(errorBuffer, ERROR_INCORRECT_FILE_SIZE, romFilePath, HBC56_ROM_SIZE, ftell(filePtr)); 
-                    fclose(filePtr);
-                    return false;
-                }
-                fclose(filePtr);       
-                args->romFile = romFilePath;
-                continue;
+            if(!filePtr) {
+                sprintf(errorBuffer, ERROR_FILE_NOT_FOUND, romFilePath); 
+                return false;  
             }
-            sprintf(errorBuffer, ERROR_FILE_NOT_FOUND, romFilePath); 
-            return false;  
+
+            fseek(filePtr, 0, SEEK_END);
+            if(ftell(filePtr) != HBC56_ROM_SIZE) {
+                sprintf(errorBuffer, ERROR_INCORRECT_FILE_SIZE, romFilePath, HBC56_ROM_SIZE, ftell(filePtr)); 
+                fclose(filePtr);
+                return false;
+            }
+            fclose(filePtr);       
+            args->romFile = romFilePath;
+            continue;
+
         }
         if(strcmp(OPTION_BREAK_ON_START, argv[i]) == 0) {
             args->breakOnStart = true;
