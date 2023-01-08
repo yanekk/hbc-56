@@ -9,6 +9,7 @@ extern "C" {
 
 typedef struct {
     char* romFile;
+    bool breakOnStart;
 } Hbc56EmulatorArgs;
 
 bool Hbc56EmulatorArgs_Parse(Hbc56EmulatorArgs* args, int argc, char* argv[]);

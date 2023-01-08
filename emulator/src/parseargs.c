@@ -6,15 +6,24 @@
 #include "parseargs.h"
 int doBreak = 0;
 
+#define OPTION_ROM "--rom"
+#define OPTION_BREAK_ON_START "--brk"
 
 bool Hbc56EmulatorArgs_Parse(Hbc56EmulatorArgs* args, int argc, char* argv[]) {
     if (argv == NULL) {
         return NULL;
     }
     for(uint8_t i = 0; i < argc; i++) {
-        if(strcmp("--rom", argv[i]) == 0) {
-            args->romFile = argv[++i];
+        if(strcmp(OPTION_ROM, argv[i]) == 0) {
+            i++;
+            if (i == argc) {
+                return NULL;
+            }
+            args->romFile = argv[i];
         }
+        if(strcmp(OPTION_BREAK_ON_START, argv[i]) == 0) {
+            args->breakOnStart = true;
+        }        
     }
     return args;
 
