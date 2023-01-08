@@ -11,7 +11,8 @@
         "vector": "c",
         "iterator": "c",
         "chrono": "c",
-        "__locale": "c"
+        "__locale": "c",
+        "*.md": "c"
     },
     "C_Cpp.default.defines": [
         "VR_6502_EMU_STATIC=1"
