@@ -24,20 +24,6 @@ extern "C" {
 struct CompactFlash;
 typedef struct CompactFlash CompactFlash;
 
-struct CompactFlash {
-    const uint8_t * _data;
-    
-    bool _isSectorNumberInvalid;
-    uint32_t _sectorNumber;
-
-    bool _isSectorCountInvalid;
-    uint8_t _sectorCount;
-
-    bool _hasDataRequest;
-    uint16_t _dataIndex;
-    uint16_t _dataEnd;
-};
-
 CompactFlash* CF_Create(const uint8_t * data);
 
 // Bit 7 (BUSY) The busy bit is set when the CompactFlash Memory Card has access to the command buffer and registers and

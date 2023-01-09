@@ -16,19 +16,33 @@
 #include <stdbool.h>
 #include <stdio.h>
 
+struct CompactFlash {
+    const uint8_t * data;
+    
+    bool isSectorNumberInvalid;
+    uint32_t sectorNumber;
+
+    bool isSectorCountInvalid;
+    uint8_t sectorCount;
+
+    bool hasDataRequest;
+    uint16_t dataIndex;
+    uint16_t dataEnd;
+};
+
 CompactFlash* CF_Create(const uint8_t * data) {
     CompactFlash* cf = malloc(sizeof(CompactFlash));
     
-    cf->_isSectorNumberInvalid = true;
-    cf->_sectorNumber = 0;    
+    cf->isSectorNumberInvalid = true;
+    cf->sectorNumber = 0;    
     
-    cf->_isSectorCountInvalid = true;
-    cf->_sectorCount = 0;
+    cf->isSectorCountInvalid = true;
+    cf->sectorCount = 0;
     
-    cf->_data = data;
-    cf->_dataIndex = 0;
-    cf->_dataEnd = 0;
-    cf->_hasDataRequest = false;    
+    cf->data = data;
+    cf->dataIndex = 0;
+    cf->dataEnd = 0;
+    cf->hasDataRequest = false;    
     return cf;
 }
 
@@ -39,40 +53,40 @@ void CF_Destroy(CompactFlash* compactFlash) {
 }
 
 void CF_Write_SectorNumber(CompactFlash *device, uint32_t number) {
-    device->_isSectorNumberInvalid = false;
-    device->_sectorNumber = number;
+    device->isSectorNumberInvalid = false;
+    device->sectorNumber = number;
 }
 
 uint32_t CF_Read_SectorNumber(CompactFlash *device) {
-    return device->_sectorNumber;
+    return device->sectorNumber;
 }
 
 bool CF_Read_Status_DataRequest(CompactFlash *device) {
-    return device->_hasDataRequest;
+    return device->hasDataRequest;
 }
 
 void CF_Write_SectorCount(CompactFlash *device, uint8_t sectorCount) {
-    device->_isSectorCountInvalid = false;
-    device->_sectorCount = sectorCount;
+    device->isSectorCountInvalid = false;
+    device->sectorCount = sectorCount;
 }
 
 bool CF_Read_Error_InvalidSector(CompactFlash *device) {
-    return device->_isSectorCountInvalid || device->_isSectorNumberInvalid;
+    return device->isSectorCountInvalid || device->isSectorNumberInvalid;
 }
 
 void CF_Write_Command_ReadSectors(CompactFlash *device) {
-    device->_hasDataRequest = true;
-    device->_dataIndex = device->_sectorNumber * SECTOR_SIZE;
-    device->_dataEnd = device->_dataIndex + device->_sectorCount * SECTOR_SIZE;
+    device->hasDataRequest = true;
+    device->dataIndex = device->sectorNumber * SECTOR_SIZE;
+    device->dataEnd = device->dataIndex + device->sectorCount * SECTOR_SIZE;
 }
 
 uint8_t CF_Read_Data(CompactFlash *device, bool isDebug) {
-    uint8_t data = device->_data[device->_dataIndex];
+    uint8_t data = device->data[device->dataIndex];
     if(!isDebug) {
-        device->_dataIndex++;
+        device->dataIndex++;
     }
-    if(device->_dataIndex == device->_dataEnd) {
-        device->_hasDataRequest = false;
+    if(device->dataIndex == device->dataEnd) {
+        device->hasDataRequest = false;
     }
     return data;
 }

@@ -2,39 +2,15 @@
 #include "devices/compactflash/compactflash.h"
 #include <stdlib.h>
 
+uint8_t* testData;
 CompactFlash* initTest(uint8_t sectorCount) {
     uint16_t dataSize = SECTOR_SIZE * (sectorCount+1);
-    uint8_t* data = malloc(sizeof(uint8_t) * dataSize);
+    testData = malloc(sizeof(uint8_t) * dataSize);
 
     for(uint16_t i = 0; i < dataSize; i++) {
-        data[i] = rand();
+        testData[i] = rand();
     }
-    return CF_Create(data);
-}
-
-void test_Create_dataIsSet(void)
-{
-    // arrange
-    uint8_t data[] = {0, 1, 2, 3, 4};
-
-    // act
-    CompactFlash* compactFlash = CF_Create(data);
-
-    // assert 
-    TEST_ASSERT(compactFlash->_data == data);
-}
-
-void test_Destroy_compactFlashIsFreed(void)
-{
-    // arrange
-    uint8_t data[] = {0, 1, 2, 3, 4};
-    CompactFlash* compactFlash = CF_Create(data);
-
-    // act
-    CF_Destroy(compactFlash);
-
-    // assert 
-    TEST_ASSERT(compactFlash->_data != data);
+    return CF_Create(testData);
 }
 
 void test_sectorNumberIsStored(void)
@@ -144,7 +120,7 @@ void test_firstByteIsReceivedForFirstSector(void)
     CF_Write_Command_ReadSectors(compactFlash);
 
     // act & assert
-    TEST_ASSERT(CF_Read_Data(compactFlash, false) == compactFlash->_data[0]);
+    TEST_ASSERT(CF_Read_Data(compactFlash, false) == testData[0]);
 }
 
 void test_firstByteIsReceivedForFirstSector_noIncrementInDebugMode(void)
@@ -157,7 +133,7 @@ void test_firstByteIsReceivedForFirstSector_noIncrementInDebugMode(void)
     CF_Read_Data(compactFlash, true);
 
     // act & assert
-    TEST_ASSERT(CF_Read_Data(compactFlash, true) == compactFlash->_data[0]);
+    TEST_ASSERT(CF_Read_Data(compactFlash, true) == testData[0]);
 }
 
 void test_secondByteIsReceivedForFirstSector(void)
@@ -170,19 +146,20 @@ void test_secondByteIsReceivedForFirstSector(void)
     CF_Read_Data(compactFlash, false); // read first byte
 
     // act & assert
-    TEST_ASSERT(CF_Read_Data(compactFlash, false) == compactFlash->_data[1]);
+    TEST_ASSERT(CF_Read_Data(compactFlash, false) == testData[1]);
 }
 
 void test_firstByteIsReceivedForSecondSector(void)
 {
     // arrange
     CompactFlash* compactFlash = initTest(2);
+    
     CF_Write_SectorNumber(compactFlash, 1);
     CF_Write_SectorCount(compactFlash, 1);
     CF_Write_Command_ReadSectors(compactFlash);
 
     // act & assert
-    TEST_ASSERT(CF_Read_Data(compactFlash, false) == compactFlash->_data[SECTOR_SIZE]);
+    TEST_ASSERT(CF_Read_Data(compactFlash, false) == testData[SECTOR_SIZE]);
 }
 
 void test_receivingAllBytesInFirstSectorUnsetsDataRequestStatus(void)
@@ -273,8 +250,6 @@ TODO:
   STA CFCMD
 */
 TEST_LIST = {
-   { "test_Create_dataIsSet", test_Create_dataIsSet },
-   { "test_Destroy_compactFlashIsFreed", test_Destroy_compactFlashIsFreed },
    { "test_sectorNumberIsStored", test_sectorNumberIsStored },
    { "test_dataRequestStatusIsZeroByDefault", test_dataRequestStatusIsZeroByDefault },
    { "test_dataRequestStatusIsZeroAfterSettingSectorCount", test_dataRequestStatusIsZeroAfterSettingSectorCount },
