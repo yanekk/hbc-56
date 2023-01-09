@@ -34,6 +34,7 @@
 #include "devices/uart_device.h"
 #include "devices/cf_device.h"
 #include "parseargs.h"
+#include "file.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -738,88 +739,36 @@ static void wasmLoop()
 }
 #endif
 
-
-static char labelMapFile[FILENAME_MAX] = { 0 };
-
-
 /* Function:  loadRom
  * --------------------
  * loads a rom from disk and creates the rom device
  */
 static int loadRom(const char* filename)
 {
-  FILE* ptr = NULL;
-  int romLoaded = 0;
-
-#ifdef __EMSCRIPTEN__
-  ptr = fopen(filename, "rb");
-#else
-  fopen_s(&ptr, filename, "rb");
-#endif
-
-  if (!ptr)
-  {
+  File* romFile = File_Read(filename);
+  if (!romFile->isOk)
     return 2;
+
+  int romLoaded = hbc56LoadRom(romFile->data, romFile->size);
+
+  File_Free(romFile);
+
+  if (!romLoaded) {
+    return romLoaded;
   }
 
-  uint8_t rom[HBC56_ROM_SIZE];
-  size_t romBytesRead = fread(rom, 1, sizeof(rom), ptr);
-  fclose(ptr);
-
-  romLoaded = hbc56LoadRom(rom, (int)romBytesRead);
-
-  if (romLoaded)
-  {
-    SDL_strlcpy(labelMapFile, filename, FILENAME_MAX);
+  File* labelMapFile = File_ReadWithSuffix(filename, ".lmap");
+  if(labelMapFile->isOk) {
+    hbc56LoadLabels((const char*)labelMapFile->data);
+  }
+  File_Free(labelMapFile);
+  
+  File* sourceFile = File_ReadWithSuffix(filename, ".rpt");
+  if(sourceFile->isOk) {
     
-    size_t ln = SDL_strlen(labelMapFile);
-    SDL_strlcpy(labelMapFile + ln, ".lmap", FILENAME_MAX - ln);
-
-#ifdef __EMSCRIPTEN__
-    ptr = fopen(labelMapFile, "rb");
-#else
-    fopen_s(&ptr, labelMapFile, "rb");
-#endif
-    if (ptr)
-    {
-
-      fseek(ptr, 0, SEEK_END);
-      long fsize = ftell(ptr);
-      fseek(ptr, 0, SEEK_SET);  /* same as rewind(f); */
-
-      char *lblFileContent = (char*)malloc(fsize + 1);
-      fread(lblFileContent, fsize, 1, ptr);
-      lblFileContent[fsize] = 0;
-      fclose(ptr);
-
-      hbc56LoadLabels(lblFileContent);
-      free(lblFileContent);
-    }
-
-    SDL_strlcpy(labelMapFile, filename, FILENAME_MAX);
-    ln = SDL_strlen(labelMapFile);
-    SDL_strlcpy(labelMapFile + ln, ".rpt", FILENAME_MAX - ln);
-
-#ifdef __EMSCRIPTEN__
-    ptr = fopen(labelMapFile, "rb");
-#else
-    fopen_s(&ptr, labelMapFile, "rb");
-#endif
-    if (ptr)
-    {
-      fseek(ptr, 0, SEEK_END);
-      long fsize = ftell(ptr);
-      fseek(ptr, 0, SEEK_SET);  /* same as rewind(f); */
-
-      char* lblFileContent = (char*)malloc(fsize + 1);
-      fread(lblFileContent, fsize, 1, ptr);
-      lblFileContent[fsize] = 0;
-      fclose(ptr);
-
-      hbc56LoadSource(lblFileContent);
-      free(lblFileContent);
-    }
+    hbc56LoadSource((const char*)sourceFile->data);
   }
+  File_Free(sourceFile);
 
   return romLoaded;
 }

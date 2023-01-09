@@ -14,7 +14,8 @@ typedef struct {
     size_t size;
 } File;
 
-File* File_Read(char* filePath);
+File* File_Read(const char* filePath);
+File* File_ReadWithSuffix(const char* filePath, const char* suffix);
 bool File_Free(File* file);
 
 #ifdef __cplusplus

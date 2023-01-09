@@ -5,7 +5,7 @@
 
 #include "file.h"
 
-File* File_Read(char* filePath) {
+File* File_Read(const char* filePath) {
     File* file = calloc(1, sizeof(File));
 
     FILE* filePtr = fopen(filePath, "r");
@@ -23,8 +23,16 @@ File* File_Read(char* filePath) {
     return file;    
 }
 
+File* File_ReadWithSuffix(const char* filePath, const char* suffix) {
+    char fullFilePath[1024];
+    sprintf(fullFilePath, "%s%s", filePath, suffix);
+    return File_Read(fullFilePath);
+}
+
 bool File_Free(File* file) {
-    free(file->data);
-    free(file);
+    if(file->data)
+        free(file->data);
+    if(file)
+        free(file);
     return true;
 }

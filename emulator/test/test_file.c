@@ -63,6 +63,20 @@ void test_existingFileHasPointerToData(void)
     TEST_ASSERT(strcmp((char*)fileInfo->data+1000-4, "end") == 0);
 }
 
+void test_existingFileIsReadable(void)
+{
+    // act
+    File* fileInfo = File_ReadWithSuffix(EXISTING_FILE, ".suffix");
+
+    // assert
+    TEST_ASSERT(fileInfo->isOk);
+    TEST_ASSERT(fileInfo->size == 1000);
+
+    TEST_ASSERT(fileInfo->data != NULL);
+    TEST_ASSERT(strcmp((char*)fileInfo->data, "suffix_start") == 0);
+    TEST_ASSERT(strcmp((char*)fileInfo->data+1000-11, "suffix_end") == 0);
+}
+
 void test_freeFileReturnsOk(void)
 {
     // arrange
@@ -82,6 +96,7 @@ TEST_LIST = {
     { "test_existingFileIsOk", test_existingFileIsOk },
     { "test_existingFileHasCorrectSize", test_existingFileHasCorrectSize },
     { "test_existingFileHasPointerToData", test_existingFileHasPointerToData },
+    { "test_existingFileIsReadable", test_existingFileIsReadable },
     { "test_freeFileReturnsOk", test_freeFileReturnsOk },
     { NULL, NULL }     /* zeroed record marking the end of the list */
 };
