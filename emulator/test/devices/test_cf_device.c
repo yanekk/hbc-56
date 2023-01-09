@@ -2,6 +2,7 @@
 #include "devices/cf_device.h"
 #include "devices/device.h"
 #include "devices/compactflash/compactflash.h"
+#include "file.h"
 
 #define BASE_ADDRESS 0x1000
 
@@ -118,8 +119,12 @@ uint8_t CF_Read_Data(CompactFlash *device, bool isDebugger) {
 
 
 void testInit() {
+    File cfImageFile = {
+        .size = 5,
+        .data = (uint8_t*)"abcd"
+    };
     compactFlashSpy = (CompactFlashSpy){0};
-    testDevice = createCompactFlashDevice(BASE_ADDRESS, NULL);
+    testDevice = createCompactFlashDevice(BASE_ADDRESS, &cfImageFile);
 }
 
 uint8_t testRead(uint8_t offset) {
@@ -138,7 +143,10 @@ void test_createDevice_nameIsSet(void)
     compactFlashSpy = (CompactFlashSpy){0};
 
     // act
-    HBC56Device testDevice = createCompactFlashDevice(0, NULL);
+    HBC56Device testDevice = createCompactFlashDevice(0, &(File) {
+        .size = 1,
+        .data = (uint8_t*)""
+    });
 
     // assert 
     TEST_ASSERT(strcmp(testDevice.name, "CompactFlash") == 0);
@@ -150,23 +158,31 @@ void test_createDevice_cfCardIsCreated(void)
     compactFlashSpy = (CompactFlashSpy){0};
 
     // act
-    createCompactFlashDevice(0, NULL);
+    createCompactFlashDevice(0, &(File) {
+        .size = 1,
+        .data = (uint8_t*)""
+    });
 
     // assert 
     TEST_ASSERT(compactFlashSpy.isCreated == true);
 }
 
-void test_createDevice_dataIsPassedToCfCard(void)
+void test_createDevice_dataIsCopiedToCfCard(void)
 {
     // arrange
     compactFlashSpy = (CompactFlashSpy){0};
-    uint8_t data[] = {0, 1, 2, 3, 4};
+
+    File cfImageFile = {
+        .size = 5,
+        .data = (uint8_t*)"abcd"
+    };
 
     // act
-    createCompactFlashDevice(0, data);
+    createCompactFlashDevice(0, &cfImageFile);
 
     // assert 
-    TEST_ASSERT(compactFlashSpy.data == data);
+    TEST_ASSERT(strcmp((char*)compactFlashSpy.data, (char*)cfImageFile.data) == 0);
+    TEST_ASSERT(compactFlashSpy.data != cfImageFile.data);
 }
 
 void test_destroyDevice_cfCardIsDestroyed(void)
@@ -459,7 +475,7 @@ void test_writeDevice_CMD_ReadSectors(void)
 TEST_LIST = {
    { "test_createDevice_nameIsSet", test_createDevice_nameIsSet },
    { "test_createDevice_cfCardIsCreated", test_createDevice_cfCardIsCreated },
-   { "test_createDevice_dataIsPassedToCfCard", test_createDevice_dataIsPassedToCfCard },
+   { "test_createDevice_dataIsCopiedToCfCard", test_createDevice_dataIsCopiedToCfCard },
    { "test_destroyDevice_cfCardIsDestroyed", test_destroyDevice_cfCardIsDestroyed },
    { "test_readDevice_CF_STAT_zeroByDefault", test_readDevice_CF_STAT_zeroByDefault },
    { "test_readDevice_CF_STAT_statusErrorSetBit0", test_readDevice_CF_STAT_statusErrorSetBit0 },

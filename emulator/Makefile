@@ -106,4 +106,4 @@ test: $(TEST_OBJECT_FILE) $(TEST_INCLUDES_OBJECTS)
 endif
 
 run:
-	.\bin\hbc56emu.exe --rom H:\src\my-6502\bin\bios.bin --brk
+	.\bin\hbc56emu.exe --rom H:\src\my-6502\bin\bios.bin --brk --cfcard H:\src\my-6502\bin\cf_card.bin

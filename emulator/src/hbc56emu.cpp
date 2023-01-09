@@ -765,7 +765,7 @@ static int loadRom(const char* filename)
   
   File* sourceFile = File_ReadWithSuffix(filename, ".rpt");
   if(sourceFile->isOk) {
-    
+
     hbc56LoadSource((const char*)sourceFile->data);
   }
   File_Free(sourceFile);
@@ -913,7 +913,13 @@ int main(int argc, char* argv[])
   hbc56AddDevice(createUartDevice(HBC56_IO_ADDRESS(HBC56_UART_PORT), HBC56_UART_PORTNAME, HBC56_UART_CLOCK_FREQ, HBC56_UART_IRQ));
 #endif
 #endif
-  hbc56AddDevice(createCompactFlashDevice(HBC56_CF_ADDRESS, NULL));
+
+  if(args.cfCardImageFile != NULL) {
+    File* cfCardImageFile = File_Read(args.cfCardImageFile);
+    hbc56AddDevice(createCompactFlashDevice(HBC56_CF_ADDRESS, cfCardImageFile));
+    File_Free(cfCardImageFile);
+  }
+  
   done = 0;
 
   /* reset the machine */

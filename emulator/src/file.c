@@ -8,7 +8,7 @@
 File* File_Read(const char* filePath) {
     File* file = calloc(1, sizeof(File));
 
-    FILE* filePtr = fopen(filePath, "r");
+    FILE* filePtr = fopen(filePath, "rb");
     if(!filePtr) {
         return file;
     }

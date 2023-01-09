@@ -2,12 +2,13 @@
 #define _HBC56_CF_DEVICE_H_
 
 #include "device.h"
+#include "file.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-HBC56Device createCompactFlashDevice(uint16_t baseAddr, const uint8_t *contents);
+HBC56Device createCompactFlashDevice(uint16_t baseAddr, File *imageFile);
 
 #define CF_DATA  0x00 // Data (R/W)
 #define CF_ERR   0x01 // Error register (R)
