@@ -6,6 +6,7 @@
 #include <string.h>
 
 #define EXISTING_ROM_FILE "test/test_parseargs_data/correct_size_rom_file.bin"
+#define EXISTING_CFCARD_FILE "test/test_parseargs_data/cfcard.bin"
 
 char errorBuffer[1024];
 
@@ -199,14 +200,59 @@ void test_errorOnLcdTypeOptionAtTheEnd(void)
 {
     // arrange
     Hbc56EmulatorArgs args = {0};
-    char* argv[] = {"--lcd"};
+    char* argv[] = {"--rom", EXISTING_ROM_FILE, "--lcd"};
+
+    // act
+    bool ok = Hbc56EmulatorArgs_Parse(&args, 3, argv, errorBuffer);
+
+    // assert
+    TEST_ASSERT(!ok);
+    TEST_ASSERT(strcmp(errorBuffer, "No LCD type set") == 0);
+}
+
+void test_parsingCfCardFileNoErrorOnExistingFile(void)
+{
+    // arrange
+    Hbc56EmulatorArgs args = {0};
+    char* cfCardImageFile = EXISTING_CFCARD_FILE;
+    char* argv[] = {"--rom", EXISTING_ROM_FILE, "--cfcard", cfCardImageFile};
+
+    // act
+    bool ok = Hbc56EmulatorArgs_Parse(&args, 4, argv, errorBuffer);
+
+    // assert
+    TEST_ASSERT(ok);
+    TEST_ASSERT(strcmp(args.cfCardImageFile, cfCardImageFile) == 0);
+}
+
+void test_parsingCfCardFileErrorOnNonExistingFile(void)
+{
+    // arrange
+    Hbc56EmulatorArgs args = {0};
+    char* cfCardImageFile = "test/test_parseargs_data/non_existing_card_image.bin";
+    char* argv[] = {"--rom", EXISTING_ROM_FILE, "--cfcard", cfCardImageFile};
+
+    // act
+    bool ok = Hbc56EmulatorArgs_Parse(&args, 4, argv, errorBuffer);
+
+    // assert
+    TEST_ASSERT(!ok);
+    TEST_ASSERT(args.cfCardImageFile == NULL);
+    TEST_ASSERT(strcmp(errorBuffer, "File 'test/test_parseargs_data/non_existing_card_image.bin' cannot be found.") == 0);
+}
+
+void test_errorOnCfCardOptionAtTheEnd(void)
+{
+    // arrange
+    Hbc56EmulatorArgs args = {0};
+    char* argv[] = {"--cfcard"};
 
     // act
     bool ok = Hbc56EmulatorArgs_Parse(&args, 1, argv, errorBuffer);
 
     // assert
     TEST_ASSERT(!ok);
-    TEST_ASSERT(strcmp(errorBuffer, "No LCD type set") == 0);
+    TEST_ASSERT(strcmp(errorBuffer, "No CompactFlash card image file specified. Use --cfcard <filename> to set it.") == 0);
 }
 
 TEST_LIST = {
@@ -223,5 +269,8 @@ TEST_LIST = {
     { "test_lcdTypeIsGraphicsWhenSet", test_lcdTypeIsGraphicsWhenSet },
     { "test_errorIfLcdTypeIsUnknown", test_errorIfLcdTypeIsUnknown },
     { "test_errorOnLcdTypeOptionAtTheEnd", test_errorOnLcdTypeOptionAtTheEnd },
+    { "test_parsingCfCardFileNoErrorOnExistingFile", test_parsingCfCardFileNoErrorOnExistingFile },
+    { "test_parsingCfCardFileErrorOnNonExistingFile", test_parsingCfCardFileErrorOnNonExistingFile },
+    { "test_errorOnCfCardOptionAtTheEnd", test_errorOnCfCardOptionAtTheEnd },
    { NULL, NULL }     /* zeroed record marking the end of the list */
 };

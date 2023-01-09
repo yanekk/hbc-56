@@ -10,6 +10,7 @@ extern "C" {
 
 typedef struct {
     char* romFile;
+    char* cfCardImageFile;
     bool breakOnStart;
     LCDType lcdType;
 } Hbc56EmulatorArgs;

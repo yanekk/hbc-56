@@ -10,13 +10,18 @@
 #define OPTION_ROM "--rom"
 #define OPTION_BREAK_ON_START "--brk"
 #define OPTION_LCD_TYPE "--lcd"
+#define OPTION_CFCARD "--cfcard"
+
+#define ERROR_FILE_NOT_FOUND "File '%s' cannot be found."
+#define ERROR_INVALID_ARGUMENTS "Invalid arguments"
 
 #define ERROR_MISSING_ROM "No HBC-56 ROM file.\n\nUse --rom <romfile>"
-#define ERROR_INVALID_ARGUMENTS "Invalid arguments"
-#define ERROR_FILE_NOT_FOUND "File '%s' cannot be found."
+#define ERROR_INCORRECT_FILE_SIZE "ROM file '%s' has incorrect size. Expected: %d, got %ld."
+
 #define ERROR_UNKNOWN_LCD_TYPE "Unknown LCD type: %s"
 #define ERROR_NO_LCD_TYPE_SET "No LCD type set"
-#define ERROR_INCORRECT_FILE_SIZE "ROM file '%s' has incorrect size. Expected: %d, got %ld."
+
+#define ERROR_MISSING_CFCARD "No CompactFlash card image file specified. Use --cfcard <filename> to set it."
 
 bool Hbc56EmulatorArgs_Parse(Hbc56EmulatorArgs* args, int argc, char* argv[], char errorBuffer[]) {
     if (argv == NULL) {
@@ -47,8 +52,23 @@ bool Hbc56EmulatorArgs_Parse(Hbc56EmulatorArgs* args, int argc, char* argv[], ch
             }
             fclose(filePtr);       
             args->romFile = romFilePath;
-            continue;
+        }
 
+        if(strcmp(OPTION_CFCARD, argv[i]) == 0) {
+            i++;
+            if (i == argc) {
+                strcpy(errorBuffer, ERROR_MISSING_CFCARD);
+                return false;
+            }
+            char* cfcardImageFilePath = argv[i];
+
+            FILE* filePtr = fopen(cfcardImageFilePath, "r");
+            if(!filePtr) {
+                sprintf(errorBuffer, ERROR_FILE_NOT_FOUND, cfcardImageFilePath); 
+                return false;  
+            }
+  
+            args->cfCardImageFile = cfcardImageFilePath;
         }
         if(strcmp(OPTION_BREAK_ON_START, argv[i]) == 0) {
             args->breakOnStart = true;
