@@ -4,11 +4,13 @@
 #include "segment.h"
 
 struct LcdSegment {
-
+    LcdState state;
 };
 
 LcdSegment* LcdSegment_Create() {
-    return malloc(sizeof(LcdSegment));
+    LcdSegment* segment = malloc(sizeof(LcdSegment));
+    segment->state = LCD_STATE_OFF;
+    return segment;
 }
 
 bool LcdSegment_Destroy(LcdSegment* segment) {
@@ -16,4 +18,8 @@ bool LcdSegment_Destroy(LcdSegment* segment) {
         free(segment);
     }
     return true;
+}
+
+LcdState LcdSegment_State(LcdSegment * segment) {
+    return segment->state;
 }

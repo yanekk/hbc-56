@@ -9,8 +9,8 @@
  *
  */
 
-#ifndef _HBC56_COMPACTFLASH_H_
-#define _HBC56_COMPACTFLASH_H_
+#ifndef _HBC56_SEGMENT_H_
+#define _HBC56_SEGMENT_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -19,7 +19,10 @@ extern "C" {
 #include <stdint.h>
 #include <stdbool.h>
 
-#define SECTOR_SIZE 512
+typedef enum {
+    LCD_STATE_OFF,
+    LCD_STATE_ON
+} LcdState;
 
 struct LcdSegment;
 typedef struct LcdSegment LcdSegment;
@@ -27,6 +30,8 @@ typedef struct LcdSegment LcdSegment;
 LcdSegment* LcdSegment_Create();
 
 bool LcdSegment_Destroy(LcdSegment * device);
+
+LcdState LcdSegment_State(LcdSegment * device);
 
 #ifdef __cplusplus
 }
