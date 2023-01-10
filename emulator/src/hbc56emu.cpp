@@ -12,6 +12,8 @@
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten/emscripten.h>
+#else
+#define HAVE_FOPEN_S 1
 #endif
 
 #include "hbc56emu.h"
@@ -40,6 +42,7 @@
 #include <stdio.h>
 #include <time.h>
 #include <string.h>
+#include <queue>
 
 #define DEFAULT_WINDOW_WIDTH  640
 #define DEFAULT_WINDOW_HEIGHT 480
@@ -51,12 +54,23 @@ static int deviceCount = 0;
 
 static HBC56Device* cpuDevice = NULL;
 static HBC56Device* romDevice = NULL;
+static HBC56Device* kbDevice = NULL;
 
+static SDL_Window* window = NULL;
+
+static char tempBuffer[256];
 
 #define MAX_IRQS 5
 static HBC56InterruptSignal irqs[MAX_IRQS];
 
 static SDL_Renderer* renderer = NULL;
+SDL_mutex* kbQueueMutex = nullptr;
+
+static std::queue<SDL_KeyboardEvent> pasteQueue;
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 
 /* Function:  hbc56Reset
@@ -100,8 +114,7 @@ HBC56Device* hbc56Device(size_t deviceNum)
 
 /* Function:  hbc56AddDevice
  * --------------------
- * add a new device
- * returns a pointer to the added device
+ * add a new device * returns a pointer to the added device
  */
 HBC56Device* hbc56AddDevice(HBC56Device device)
 {
@@ -210,6 +223,96 @@ const char* hbc56GetLayout()
   return ImGui::SaveIniSettingsToMemory(0);
 }
 
+/* Function:  hbc56PasteText
+ * --------------------
+ * paste text (emulates key presses)
+ */
+void hbc56PasteText(const char* text)
+{
+  SDL_LockMutex(kbQueueMutex);
+  while (*text)
+  {
+    char c = *(text++);
+    SDL_Scancode sc = SDL_SCANCODE_UNKNOWN;
+    bool shift = false;
+    if (SDL_islower(c)) {
+      sc = (SDL_Scancode)(c - 'a' + SDL_SCANCODE_A);
+    }
+    else if (SDL_isupper(c)) 
+    {
+      sc = (SDL_Scancode)(c - 'A' + SDL_SCANCODE_A);
+      shift = true;
+    }
+    else if (SDL_isdigit(c))
+    {
+      if (c == '0') sc = SDL_SCANCODE_0;
+      else sc = (SDL_Scancode)(c - '1' + SDL_SCANCODE_1);
+    }
+    else
+    {
+      switch (c)
+      {
+        case ' ': sc = SDL_SCANCODE_SPACE; break;
+        case '!': sc = SDL_SCANCODE_1; shift = true; break;
+        case '\"': sc = SDL_SCANCODE_APOSTROPHE; shift = true; break;
+        case '#': sc = SDL_SCANCODE_3; shift = true; break;
+        case '$': sc = SDL_SCANCODE_4; shift = true; break;
+        case '%': sc = SDL_SCANCODE_5; shift = true; break;
+        case '&': sc = SDL_SCANCODE_7; shift = true; break;
+        case '\'': sc = SDL_SCANCODE_APOSTROPHE; break;
+        case '(': sc = SDL_SCANCODE_9; shift = true; break;
+        case ')': sc = SDL_SCANCODE_0; shift = true; break;
+        case '*': sc = SDL_SCANCODE_8; shift = true; break;
+        case '+': sc = SDL_SCANCODE_EQUALS; shift = true; break;
+        case ',': sc = SDL_SCANCODE_COMMA;  break;
+        case '-': sc = SDL_SCANCODE_MINUS;  break;
+        case '.': sc = SDL_SCANCODE_PERIOD;  break;
+        case '/': sc = SDL_SCANCODE_SLASH;  break;
+        case ':': sc = SDL_SCANCODE_SEMICOLON; shift = true; break;
+        case ';': sc = SDL_SCANCODE_SEMICOLON; break;
+        case '<': sc = SDL_SCANCODE_COMMA; shift = true; break;
+        case '=': sc = SDL_SCANCODE_EQUALS;  break;
+        case '>': sc = SDL_SCANCODE_PERIOD; shift = true; break;
+        case '?': sc = SDL_SCANCODE_SLASH; shift = true; break;
+        case '[': sc = SDL_SCANCODE_LEFTBRACKET; break;
+        case '\\': sc = SDL_SCANCODE_BACKSLASH; break;
+        case ']': sc = SDL_SCANCODE_RIGHTBRACKET; break;
+        case '^': sc = SDL_SCANCODE_6; shift = true; break;
+        case '_': sc = SDL_SCANCODE_MINUS; shift = true; break;
+        case '`': sc = SDL_SCANCODE_GRAVE; break;
+        case '{': sc = SDL_SCANCODE_LEFTBRACKET; shift = true; break;
+        case '|': sc = SDL_SCANCODE_BACKSLASH; shift = true; break;
+        case '}': sc = SDL_SCANCODE_RIGHTBRACKET; shift = true; break;
+        case '~': sc = SDL_SCANCODE_GRAVE; shift = true; break;
+        case '\t': sc = SDL_SCANCODE_TAB; break;
+        case '\n': sc = SDL_SCANCODE_RETURN; break;
+      }
+    }
+
+    if (sc != SDL_SCANCODE_UNKNOWN)
+    {
+      SDL_KeyboardEvent ev;
+      ev.type = SDL_KEYDOWN;
+      if (shift)
+      {
+        ev.keysym.scancode = SDL_SCANCODE_LSHIFT;
+        pasteQueue.push(ev);
+      }
+
+      ev.keysym.scancode = sc;
+      pasteQueue.push(ev);
+      ev.type = SDL_KEYUP;
+      pasteQueue.push(ev);
+
+      if (shift)
+      {
+        ev.keysym.scancode = SDL_SCANCODE_LSHIFT;
+        pasteQueue.push(ev);
+      }
+    }    
+  }
+  SDL_UnlockMutex(kbQueueMutex);
+}
 
 /* Function:  hbc56ToggleDebugger
  * --------------------
@@ -290,11 +393,13 @@ uint8_t hbc56MemRead(uint16_t addr, bool dbg)
     return val;
   }
 
+  SDL_LockMutex(kbQueueMutex);
   for (size_t i = 0; i < deviceCount; ++i)
   {
     if (readDevice(&devices[i], addr, &val, dbg))
       break;
   }
+  SDL_UnlockMutex(kbQueueMutex);
 
   return val;
 }
@@ -311,6 +416,11 @@ void hbc56MemWrite(uint16_t addr, uint8_t val)
       break;
   }
 }
+
+#ifdef __cplusplus
+}
+#endif
+
 
 
 /* emulator constants */
@@ -544,7 +654,8 @@ static void doRender()
  */
 static void doEvents()
 {
-
+  SDL_LockMutex(kbQueueMutex);
+    
   SDL_Event event;
   while (SDL_PollEvent(&event))
   {
@@ -584,6 +695,18 @@ static void doEvents()
             if (withControl)
             {
               hbc56ToggleDebugger();
+            }
+            break;
+
+          case SDLK_v:
+            if (withControl)
+            {
+              skipProcessing = 1;
+              if (SDL_HasClipboardText()) {
+                char *text = SDL_GetClipboardText();
+                hbc56PasteText(text);
+                SDL_free(text);
+              }
             }
             break;
 
@@ -669,6 +792,10 @@ static void doEvents()
             if (withControl) skipProcessing = 1;
             break;
 
+          case SDLK_v:
+            if (withControl) skipProcessing = 1;
+            break;
+
           default:
             break;
         }
@@ -684,13 +811,36 @@ static void doEvents()
 
     if (!skipProcessing)
     {
-      for (size_t i = 0; i < deviceCount; ++i)
+      if (event.type == SDL_KEYDOWN || event.type == SDL_KEYUP)
       {
-        eventDevice(&devices[i], &event);
+        pasteQueue.push(event.key);
+      }
+      else
+      {
+        for (size_t i = 0; i < deviceCount; ++i)
+        {
+          eventDevice(&devices[i], &event);
+        }
       }
     }
-    //SDLCommonEvent(state, &event, &done);
   }
+
+  if (keyboardDeviceQueueEmpty(kbDevice))
+  {
+    for (int i = 0; i < 2 && !pasteQueue.empty(); ++i)
+    {
+      SDL_Event ev;
+      ev.type = pasteQueue.front().type;
+      ev.key = pasteQueue.front();
+      pasteQueue.pop();
+
+      for (size_t i = 0; i < deviceCount; ++i)
+      {
+        eventDevice(&devices[i], &ev);
+      }
+    }
+  }
+  SDL_UnlockMutex(kbQueueMutex);
 }
 
 /* Function:  loop
@@ -714,6 +864,10 @@ static void loop()
     tickCount = 0;
 
     doEvents();
+
+    SDL_snprintf(tempBuffer, sizeof(tempBuffer), "Troy's HBC-56 Emulator - %0.6f%%", getCpuUtilization(cpuDevice) * 100.0f);
+    SDL_SetWindowTitle(window, tempBuffer);
+
   }
 
 
@@ -785,8 +939,10 @@ int main(int argc, char* argv[])
     return -1;
   }
 
+  kbQueueMutex = SDL_CreateMutex();
+
   SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
-  SDL_Window* window = SDL_CreateWindow("HBC-56 Emulator", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1600, 800, window_flags);
+  window = SDL_CreateWindow("HBC-56 Emulator", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1600, 800, window_flags);
 
   // Setup SDL_Renderer instance
   renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_ACCELERATED);
@@ -886,7 +1042,7 @@ int main(int argc, char* argv[])
 #endif
 
 #if HBC56_HAVE_KB
-  hbc56AddDevice(createKeyboardDevice(HBC56_IO_ADDRESS(HBC56_KB_PORT), HBC56_KB_IRQ));
+  kbDevice = hbc56AddDevice(createKeyboardDevice(HBC56_IO_ADDRESS(HBC56_KB_PORT), HBC56_KB_IRQ));
 #endif
 
 #if HBC56_HAVE_NES
@@ -958,6 +1114,8 @@ int main(int argc, char* argv[])
   SDL_DestroyRenderer(renderer);
   SDL_DestroyWindow(window);
   SDL_Quit();
+
+  SDL_DestroyMutex(kbQueueMutex);
 
   return 0;
 }

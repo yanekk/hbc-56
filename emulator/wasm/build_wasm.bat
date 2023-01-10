@@ -19,7 +19,7 @@ emcc -o hbc56.html ^
   -D VR_6502_EMU_STATIC=1 ^
   -s DISABLE_DEPRECATED_FIND_EVENT_TARGET_BEHAVIOR=1 ^
   -s USE_SDL=2 ^
-  -s INITIAL_MEMORY=32MB ^
+  -s INITIAL_MEMORY=64MB ^
   -I ..\modules\ay38910 ^
   -I ..\modules\65c02\src ^
   -I ..\modules\lcd\src ^
@@ -52,5 +52,5 @@ emcc -o hbc56.html ^
   --preload-file "rom.bin.lmap" ^
   --preload-file "rom.bin.rpt" ^
   --preload-file "imgui.ini" ^
-  -s EXPORTED_FUNCTIONS="['_hbc56Audio','_hbc56Reset','_hbc56LoadRom','_hbc56LoadLabels','_hbc56LoadSource','_hbc56LoadLayout','_hbc56GetLayout','_hbc56ToggleDebugger','_hbc56DebugBreak','_hbc56DebugBreakOnInt','_hbc56DebugRun','_hbc56DebugStepInto','_hbc56DebugStepOver','_hbc56DebugStepOut','_main']" ^
+  -s EXPORTED_FUNCTIONS="['_hbc56Audio','_hbc56Reset','_hbc56LoadRom','_hbc56LoadLabels','_hbc56LoadSource','_hbc56LoadLayout','_hbc56GetLayout','_hbc56PasteText','_hbc56ToggleDebugger','_hbc56DebugBreak','_hbc56DebugBreakOnInt','_hbc56DebugRun','_hbc56DebugStepInto','_hbc56DebugStepOver','_hbc56DebugStepOut','_main']" ^
   -s EXPORTED_RUNTIME_METHODS="['ccall','cwrap']"
