@@ -29,9 +29,13 @@ typedef struct LcdSegment LcdSegment;
 
 LcdSegment* LcdSegment_Create();
 
-bool LcdSegment_Destroy(LcdSegment * device);
+bool LcdSegment_Destroy(LcdSegment * segment);
 
-LcdState LcdSegment_State(LcdSegment * device);
+LcdState LcdSegment_State(LcdSegment * segment);
+
+void LcdSegment_TurnOn(LcdSegment * segment);
+
+void LcdSegment_TurnOff(LcdSegment * segment);
 
 #ifdef __cplusplus
 }

@@ -23,3 +23,11 @@ bool LcdSegment_Destroy(LcdSegment* segment) {
 LcdState LcdSegment_State(LcdSegment * segment) {
     return segment->state;
 }
+
+void LcdSegment_TurnOn(LcdSegment * segment) {
+    segment->state = LCD_STATE_ON;
+}
+
+void LcdSegment_TurnOff(LcdSegment * segment) {
+    segment->state = LCD_STATE_OFF;
+}
