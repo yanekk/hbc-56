@@ -19,6 +19,9 @@ extern "C" {
 #include <stdint.h>
 #include <stdbool.h>
 
+#define LCD_SEGMENT_COLUMNS 64
+#define LCD_SEGMENT_ROWS 8
+
 typedef enum {
     LCD_STATE_OFF,
     LCD_STATE_ON
@@ -29,13 +32,15 @@ typedef struct LcdSegment LcdSegment;
 
 LcdSegment* LcdSegment_Create();
 
-bool LcdSegment_Destroy(LcdSegment * segment);
+bool LcdSegment_Destroy(LcdSegment* segment);
 
-LcdState LcdSegment_State(LcdSegment * segment);
+LcdState LcdSegment_State(LcdSegment* segment);
 
-void LcdSegment_TurnOn(LcdSegment * segment);
+void LcdSegment_TurnOn(LcdSegment* segment);
 
-void LcdSegment_TurnOff(LcdSegment * segment);
+void LcdSegment_TurnOff(LcdSegment* segment);
+
+uint8_t* LcdSegment_GetVRAM(LcdSegment* segment);
 
 #ifdef __cplusplus
 }

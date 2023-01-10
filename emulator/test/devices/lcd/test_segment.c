@@ -98,6 +98,24 @@ void test_turnOffTwice_keepDeviceTurnedOff(void)
     TEST_ASSERT(LcdSegment_State(segment) == LCD_STATE_OFF);
 }
 
+void test_getVramOnNewSegment_ReturnsEmptyArray(void)
+{
+    // arrange
+    LcdSegment* segment = LcdSegment_Create();
+
+    // act
+    uint8_t* vram = LcdSegment_GetVRAM(segment);
+
+    // assert
+    uint16_t totalByteValue = 0;
+    for(size_t y = 0; y < LCD_SEGMENT_COLUMNS; y++) {
+        for(size_t x = 0; x < LCD_SEGMENT_ROWS; x++) {
+            totalByteValue += vram[(y*LCD_SEGMENT_COLUMNS) + x];
+        }
+    }
+    TEST_ASSERT(totalByteValue == 0);
+}
+
 TEST_LIST = {
     { "test_createSegment", test_createSegment },
     { "test_destroySegment", test_destroySegment },
@@ -106,5 +124,6 @@ TEST_LIST = {
     { "test_turnOffOnNewSegment_keepSegmentTurnedOff", test_turnOffOnNewSegment_keepSegmentTurnedOff },
     { "test_turnOff_turnsOffSegment", test_turnOff_turnsOffSegment },
     { "test_turnOffTwice_keepDeviceTurnedOff", test_turnOffTwice_keepDeviceTurnedOff },
+    { "test_getVramOnNewSegment_ReturnsEmptyArray", test_getVramOnNewSegment_ReturnsEmptyArray },
     { NULL, NULL }     /* zeroed record marking the end of the list */
 };
