@@ -40,7 +40,11 @@ void LcdSegment_TurnOn(LcdSegment* segment);
 
 void LcdSegment_TurnOff(LcdSegment* segment);
 
-uint8_t* LcdSegment_GetVRAM(LcdSegment* segment);
+uint8_t LcdSegment_ReadData(LcdSegment* segment);
+
+void LcdSegment_WriteData(LcdSegment* segment, uint8_t data);
+
+void LcdSegment_SetAddress(LcdSegment* segment, uint8_t y);
 
 #ifdef __cplusplus
 }

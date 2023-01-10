@@ -6,11 +6,15 @@
 struct LcdSegment {
     LcdState state;
     uint8_t* vram;
+    uint8_t y;
+    uint8_t x;
 };
 
 LcdSegment* LcdSegment_Create() {
     LcdSegment* segment = malloc(sizeof(LcdSegment));
     segment->state = LCD_STATE_OFF;
+    segment->y = 0;
+    segment->x = 0;
     segment->vram = calloc(sizeof(uint8_t),  LCD_SEGMENT_COLUMNS * LCD_SEGMENT_ROWS);
     return segment;
 }
@@ -34,6 +38,21 @@ void LcdSegment_TurnOff(LcdSegment * segment) {
     segment->state = LCD_STATE_OFF;
 }
 
-uint8_t* LcdSegment_GetVRAM(LcdSegment* segment) {
-    return segment->vram;
+uint8_t LcdSegment_ReadData(LcdSegment* segment) {
+    uint8_t data = segment->vram[segment->y*LCD_SEGMENT_COLUMNS + segment->x];
+    segment->y++;
+    if(segment->y == 64)
+        segment->y = 0;
+    return data;
+}
+
+void LcdSegment_WriteData(LcdSegment* segment, uint8_t data) {
+    segment->vram[segment->y*LCD_SEGMENT_COLUMNS + segment->x] = data;
+    segment->y++;
+    if(segment->y == 64)
+        segment->y = 0;
+}
+
+void LcdSegment_SetAddress(LcdSegment* segment, uint8_t y) {
+    segment->y = y;
 }
