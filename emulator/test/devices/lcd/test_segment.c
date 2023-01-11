@@ -170,6 +170,37 @@ void test_readData_debugFlagNoAddressIncrease(void)
         && LcdSegment_ReadData(segment, true) == 1);
 }
 
+void test_writeBuffer(void)
+{
+    // arrange
+    LcdSegment* segment = LcdSegment_Create();
+    LcdSegment_WriteData(segment, 1);
+    LcdSegment_WriteData(segment, 2);
+    LcdSegment_WriteData(segment, 4);
+    
+    LcdSegment_SetAddress(segment, LCD_SEGMENT_COLUMNS-3);
+
+    LcdSegment_WriteData(segment, 6);
+    LcdSegment_WriteData(segment, 8);
+    LcdSegment_WriteData(segment, 10);
+
+
+    uint8_t* buffer[LCD_SEGMENT_COLUMNS * LCD_SEGMENT_ROWS] = {0};
+
+    // act
+    LcdSegment_GetVram(segment, &buffer);
+
+    // assert
+    TEST_ASSERT(buffer[0] == 1);
+    TEST_ASSERT(buffer[1] == 2);
+    TEST_ASSERT(buffer[2] == 4);
+    TEST_ASSERT(buffer[3] == 0);
+
+    TEST_ASSERT(buffer[LCD_SEGMENT_COLUMNS - 3] == 6);
+    TEST_ASSERT(buffer[LCD_SEGMENT_COLUMNS - 2] == 8);
+    TEST_ASSERT(buffer[LCD_SEGMENT_COLUMNS - 1] == 10);
+}
+
 TEST_LIST = {
     { "test_createSegment", test_createSegment },
     { "test_destroySegment", test_destroySegment },
