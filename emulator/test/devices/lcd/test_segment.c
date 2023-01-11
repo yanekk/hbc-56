@@ -122,8 +122,11 @@ void test_storingAndReadingByteIncreasesAddress(void)
     LcdSegment_SetAddress(segment, 0);
 
     // assert
-    TEST_ASSERT(LcdSegment_ReadData(segment, false) == 53);
-    TEST_ASSERT(LcdSegment_ReadData(segment, false) == 35);
+    uint8_t buffer[LCD_SEGMENT_COLUMNS * LCD_SEGMENT_ROWS] = {0};
+    LcdSegment_CopyVram(segment, (uint8_t*)&buffer);
+
+    TEST_ASSERT(buffer[0] == 53);
+    TEST_ASSERT(buffer[1] == 35);
 }
 
 void test_writeData_addressOverflow(void)
