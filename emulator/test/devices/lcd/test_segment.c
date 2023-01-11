@@ -108,7 +108,7 @@ void test_storesByteAtDefaultAddress(void)
     LcdSegment_SetAddress(segment, 0);
 
     // assert
-    TEST_ASSERT(LcdSegment_ReadData(segment) == 53);
+    TEST_ASSERT(LcdSegment_ReadData(segment, false) == 53);
 }
 
 void test_storingAndReadingByteIncreasesAddress(void)
@@ -122,8 +122,8 @@ void test_storingAndReadingByteIncreasesAddress(void)
     LcdSegment_SetAddress(segment, 0);
 
     // assert
-    TEST_ASSERT(LcdSegment_ReadData(segment) == 53);
-    TEST_ASSERT(LcdSegment_ReadData(segment) == 35);
+    TEST_ASSERT(LcdSegment_ReadData(segment, false) == 53);
+    TEST_ASSERT(LcdSegment_ReadData(segment, false) == 35);
 }
 
 void test_writeData_addressOverflow(void)
@@ -137,7 +137,7 @@ void test_writeData_addressOverflow(void)
     LcdSegment_WriteData(segment, 35);
 
     // assert
-    TEST_ASSERT(LcdSegment_ReadData(segment) == 53);
+    TEST_ASSERT(LcdSegment_ReadData(segment, false) == 53);
 }
 
 void test_readData_addressOverflow(void)
@@ -148,28 +148,27 @@ void test_readData_addressOverflow(void)
     // act
     LcdSegment_WriteData(segment, 53);
     LcdSegment_SetAddress(segment, LCD_SEGMENT_COLUMNS-1);
-    LcdSegment_ReadData(segment);
+    LcdSegment_ReadData(segment, false);
 
     // assert
-    TEST_ASSERT(LcdSegment_ReadData(segment) == 53);
+    TEST_ASSERT(LcdSegment_ReadData(segment, false) == 53);
 }
 
-// void test_getVramOnNewSegment_ReturnsEmptyArray(void)
-// {
-//     // arrange
-//     LcdSegment* segment = LcdSegment_Create();
+void test_readData_debugFlagNoAddressIncrease(void)
+{
+    // arrange
+    LcdSegment* segment = LcdSegment_Create();
 
-//     // act
-//     uint16_t totalByteValue = 0;
-//     for(uint8_t y = 0; y < LCD_SEGMENT_COLUMNS; y++) {
-//         for(uint8_t x = 0; x < LCD_SEGMENT_ROWS; x++) {
-//             totalByteValue += LcdSegment_GetData(segment);
-//         }
-//     }
+    // act
+    LcdSegment_WriteData(segment, 1);
+    LcdSegment_WriteData(segment, 2);
+    
+    LcdSegment_SetAddress(segment, 0);
 
-//     // assert
-//     TEST_ASSERT(totalByteValue == 0);
-// }
+    // assert
+    TEST_ASSERT(LcdSegment_ReadData(segment, true) == 1 
+        && LcdSegment_ReadData(segment, true) == 1);
+}
 
 TEST_LIST = {
     { "test_createSegment", test_createSegment },
@@ -179,10 +178,10 @@ TEST_LIST = {
     { "test_turnOffOnNewSegment_keepSegmentTurnedOff", test_turnOffOnNewSegment_keepSegmentTurnedOff },
     { "test_turnOff_turnsOffSegment", test_turnOff_turnsOffSegment },
     { "test_turnOffTwice_keepDeviceTurnedOff", test_turnOffTwice_keepDeviceTurnedOff },
-    //{ "test_getVramOnNewSegment_ReturnsEmptyArray", test_getVramOnNewSegment_ReturnsEmptyArray },
     { "test_storesByteAtDefaultAddress", test_storesByteAtDefaultAddress },
     { "test_storingAndReadingByteIncreasesAddress", test_storingAndReadingByteIncreasesAddress },
     { "test_writeData_addressOverflow", test_writeData_addressOverflow },
     { "test_readData_addressOverflow", test_readData_addressOverflow },
+    { "test_readData_debugFlagNoAddressIncrease", test_readData_debugFlagNoAddressIncrease },
     { NULL, NULL }     /* zeroed record marking the end of the list */
 };

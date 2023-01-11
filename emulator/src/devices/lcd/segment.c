@@ -38,8 +38,11 @@ void LcdSegment_TurnOff(LcdSegment * segment) {
     segment->state = LCD_STATE_OFF;
 }
 
-uint8_t LcdSegment_ReadData(LcdSegment* segment) {
+uint8_t LcdSegment_ReadData(LcdSegment* segment, bool debug) {
     uint8_t data = segment->vram[segment->y*LCD_SEGMENT_COLUMNS + segment->x];
+    if(debug)
+        return data;
+        
     segment->y++;
     if(segment->y == 64)
         segment->y = 0;
