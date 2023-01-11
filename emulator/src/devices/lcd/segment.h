@@ -47,6 +47,8 @@ void LcdSegment_WriteData(LcdSegment* segment, uint8_t data);
 
 void LcdSegment_SetAddress(LcdSegment* segment, uint8_t y);
 
+void LcdSegment_SetPage(LcdSegment* segment, uint8_t page);
+
 void LcdSegment_CopyVram(LcdSegment* segment, uint8_t* buffer);
 
 #ifdef __cplusplus

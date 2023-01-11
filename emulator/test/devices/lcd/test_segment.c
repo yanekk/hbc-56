@@ -108,10 +108,13 @@ void test_storesByteAtDefaultAddress(void)
     LcdSegment_SetAddress(segment, 0);
 
     // assert
-    TEST_ASSERT(LcdSegment_ReadData(segment, false) == 53);
+    uint8_t buffer[LCD_SEGMENT_COLUMNS * LCD_SEGMENT_ROWS] = {0};
+    LcdSegment_CopyVram(segment, (uint8_t*)&buffer);
+    
+    TEST_ASSERT(buffer[0] == 53);
 }
 
-void test_storingAndReadingByteIncreasesAddress(void)
+void test_writingByteIncreasesAddress(void)
 {
     // arrange
     LcdSegment* segment = LcdSegment_Create();
@@ -119,7 +122,6 @@ void test_storingAndReadingByteIncreasesAddress(void)
     // act
     LcdSegment_WriteData(segment, 53);
     LcdSegment_WriteData(segment, 35);
-    LcdSegment_SetAddress(segment, 0);
 
     // assert
     uint8_t buffer[LCD_SEGMENT_COLUMNS * LCD_SEGMENT_ROWS] = {0};
@@ -173,7 +175,7 @@ void test_readData_debugFlagNoAddressIncrease(void)
         && LcdSegment_ReadData(segment, true) == 1);
 }
 
-void test_writeBuffer(void)
+void test_copyVram(void)
 {
     // arrange
     LcdSegment* segment = LcdSegment_Create();
@@ -186,7 +188,6 @@ void test_writeBuffer(void)
     LcdSegment_WriteData(segment, 6);
     LcdSegment_WriteData(segment, 8);
     LcdSegment_WriteData(segment, 10);
-
 
     uint8_t buffer[LCD_SEGMENT_COLUMNS * LCD_SEGMENT_ROWS] = {0};
 
@@ -204,6 +205,41 @@ void test_writeBuffer(void)
     TEST_ASSERT(buffer[LCD_SEGMENT_COLUMNS - 1] == 10);
 }
 
+void test_setPage_storesDataAtRightPosition(void)
+{
+    // arrange
+    LcdSegment* segment = LcdSegment_Create();
+
+    // act
+    for(size_t x = 0; x < 8; x++) {
+        LcdSegment_SetPage(segment, x);
+        LcdSegment_SetAddress(segment, 0);
+        
+        LcdSegment_WriteData(segment, 1 + x);
+        LcdSegment_WriteData(segment, 2 + x);
+        LcdSegment_WriteData(segment, 3 + x);
+
+        LcdSegment_SetAddress(segment, LCD_SEGMENT_COLUMNS-3);
+
+        LcdSegment_WriteData(segment, 4 + x);
+        LcdSegment_WriteData(segment, 5 + x);
+        LcdSegment_WriteData(segment, 6 + x);
+    }
+
+    // assert
+    uint8_t buffer[LCD_SEGMENT_COLUMNS * LCD_SEGMENT_ROWS] = {0};
+    LcdSegment_CopyVram(segment, (uint8_t*)&buffer);
+    for(size_t x = 0; x < 8; x++) {
+        TEST_ASSERT(buffer[x * LCD_SEGMENT_COLUMNS + 0] == 1+x);
+        TEST_ASSERT(buffer[x * LCD_SEGMENT_COLUMNS + 1] == 2+x);
+        TEST_ASSERT(buffer[x * LCD_SEGMENT_COLUMNS + 2] == 3+x);
+
+        TEST_ASSERT(buffer[x * LCD_SEGMENT_COLUMNS + LCD_SEGMENT_COLUMNS - 3] == 4+x);
+        TEST_ASSERT(buffer[x * LCD_SEGMENT_COLUMNS + LCD_SEGMENT_COLUMNS - 2] == 5+x);
+        TEST_ASSERT(buffer[x * LCD_SEGMENT_COLUMNS + LCD_SEGMENT_COLUMNS - 1] == 6+x);
+    }
+}
+
 TEST_LIST = {
     { "test_createSegment", test_createSegment },
     { "test_destroySegment", test_destroySegment },
@@ -213,10 +249,11 @@ TEST_LIST = {
     { "test_turnOff_turnsOffSegment", test_turnOff_turnsOffSegment },
     { "test_turnOffTwice_keepDeviceTurnedOff", test_turnOffTwice_keepDeviceTurnedOff },
     { "test_storesByteAtDefaultAddress", test_storesByteAtDefaultAddress },
-    { "test_storingAndReadingByteIncreasesAddress", test_storingAndReadingByteIncreasesAddress },
+    { "test_writingByteIncreasesAddress", test_writingByteIncreasesAddress },
     { "test_writeData_addressOverflow", test_writeData_addressOverflow },
     { "test_readData_addressOverflow", test_readData_addressOverflow },
     { "test_readData_debugFlagNoAddressIncrease", test_readData_debugFlagNoAddressIncrease },
-    { "test_writeBuffer", test_writeBuffer },
+    { "test_copyVram", test_copyVram },
+    { "test_setPage_storesDataAtRightPosition", test_setPage_storesDataAtRightPosition },
     { NULL, NULL }     /* zeroed record marking the end of the list */
 };

@@ -61,6 +61,10 @@ void LcdSegment_SetAddress(LcdSegment* segment, uint8_t y) {
     segment->y = y;
 }
 
+void LcdSegment_SetPage(LcdSegment* segment, uint8_t page) {
+    segment->x = page;
+}
+
 void LcdSegment_CopyVram(LcdSegment* segment, uint8_t* buffer) {
     memcpy(buffer, segment->vram, sizeof(uint8_t) * LCD_SEGMENT_SIZE);
 }
