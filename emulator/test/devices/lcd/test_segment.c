@@ -240,6 +240,114 @@ void test_setPage_storesDataAtRightPosition(void)
     }
 }
 
+// void test_setStartLine_pushesDataForwardWithinOneByte(void)
+// {
+//     // arrange
+//     LcdSegment* segment = LcdSegment_Create();
+//     uint8_t buffer[LCD_SEGMENT_COLUMNS * LCD_SEGMENT_ROWS] = {0};
+//     uint8_t data[8][8] = {
+//         {12, 23, 34, 45, 56, 67, 78, 89},
+//         {89, 12, 23, 34, 45, 56, 67, 78},
+//         {78, 89, 12, 23, 34, 45, 56, 67},
+//         {67, 78, 89, 12, 23, 34, 45, 56},
+//         {56, 67, 78, 89, 12, 23, 34, 45},
+//         {45, 56, 67, 78, 89, 12, 23, 34},
+//         {34, 45, 56, 67, 78, 89, 12, 23},
+//         {23, 34, 45, 56, 67, 78, 89, 12},
+//     };
+    
+//     for (uint8_t x = 0; x < 8; x++) {
+//         LcdSegment_SetPage(segment, x);
+//         LcdSegment_SetAddress(segment, 0);
+//         LcdSegment_WriteData(segment, data[0][x]);
+//     }
+
+//     for (uint8_t startLine8 = 0; startLine8 < 8; startLine8++) {
+//         // act
+//         LcdSegment_SetStartLine(segment, 8 * startLine8);
+
+//         // assert
+//         LcdSegment_CopyVram(segment, (uint8_t*)&buffer);
+//         for(uint8_t page = 0; page < 8; page++) {
+//             TEST_ASSERT(buffer[page * LCD_SEGMENT_COLUMNS] == data[startLine8][page]);
+//         }
+//     }
+// }
+
+bool shiftRightWithCarry(uint8_t input, bool carry, uint8_t* output) {
+    uint16_t longInput = (uint16_t)input << 7;
+    *output = (uint8_t)(longInput >> 8 | carry << 7);
+    return (bool)((uint8_t)longInput >> 7);
+}
+
+void test_shiftRightWithCarry_withCarry() {
+    // arrange
+    uint8_t input = 0b11110000;
+    uint8_t output = 0;
+
+    // act
+    shiftRightWithCarry(input, true, &output);
+
+    // assert
+    TEST_ASSERT(output == 0b11111000);
+}
+
+void test_shiftRightWithCarry_withoutCarry() {
+    // arrange
+    uint8_t input = 0b11110000;
+    uint8_t output = 0;
+
+    // act
+    shiftRightWithCarry(input, false, &output);
+
+    // assert
+    TEST_ASSERT(output == 0b01111000);
+}
+
+void test_shiftRightWithCarry_returnsCarry() {
+    // arrange
+    uint8_t input = 0b11110001;
+    uint8_t output = 0;
+
+    // act
+    bool carry = shiftRightWithCarry(input, false, &output);
+
+    // assert
+    TEST_ASSERT(carry == true);
+}
+
+void test_shiftRightWithCarry_notReturnCarry() {
+    // arrange
+    uint8_t input = 0b11110000;
+    uint8_t output = 0;
+
+    // act
+    bool carry = shiftRightWithCarry(input, false, &output);
+
+    // assert
+    TEST_ASSERT(carry == false);
+}
+
+// void shiftLeftMultiple(uint8_t* array, uint8_t arrayCount, uint8_t* buffer) {
+//     uint32_t tmp = (uint32_t)array[0] << shift;
+//     uint16_t result = (uint16_t)tmp;
+//     uint16_t carry  = (uint16_t)(tmp >> 16);
+// }
+
+// void test_shiftMultipleBytes() {
+//     // arrange
+//     uint8_t initial[2]  = {0b11110000, 0b00001111};
+//     uint8_t actual[2]   = {0};
+//     uint8_t expected[2] = {0b11111000, 0b00000111};
+
+//     // act
+//     shiftLeftMultiple(initial, 2, 1, &actual);
+
+//     // assert
+//     TEST_ASSERT(actual[0] == expected[0]);
+//     TEST_ASSERT(actual[1] == expected[1]);
+// }
+
 TEST_LIST = {
     { "test_createSegment", test_createSegment },
     { "test_destroySegment", test_destroySegment },
@@ -255,5 +363,11 @@ TEST_LIST = {
     { "test_readData_debugFlagNoAddressIncrease", test_readData_debugFlagNoAddressIncrease },
     { "test_copyVram", test_copyVram },
     { "test_setPage_storesDataAtRightPosition", test_setPage_storesDataAtRightPosition },
+    { "test_shiftRightWithCarry_withCarry", test_shiftRightWithCarry_withCarry },
+    { "test_shiftRightWithCarry_withoutCarry", test_shiftRightWithCarry_withoutCarry },
+    { "test_shiftRightWithCarry_returnsCarry", test_shiftRightWithCarry_returnsCarry },
+    { "test_shiftRightWithCarry_notReturnCarry", test_shiftRightWithCarry_notReturnCarry },
+    //{ "test_shiftMultipleBytes", test_shiftMultipleBytes },
+    // { "test_setStartLine_pushesDataForwardWithinOneByte", test_setStartLine_pushesDataForwardWithinOneByte },
     { NULL, NULL }     /* zeroed record marking the end of the list */
 };

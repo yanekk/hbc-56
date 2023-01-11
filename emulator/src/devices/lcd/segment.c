@@ -7,8 +7,7 @@
 struct LcdSegment {
     LcdState state;
     uint8_t* vram;
-    uint8_t y;
-    uint8_t x;
+    uint8_t y, x, startLine;
 };
 
 LcdSegment* LcdSegment_Create() {
@@ -16,6 +15,7 @@ LcdSegment* LcdSegment_Create() {
     segment->state = LCD_STATE_OFF;
     segment->y = 0;
     segment->x = 0;
+    segment->startLine = 0;
     segment->vram = calloc(sizeof(uint8_t),  LCD_SEGMENT_SIZE);
     return segment;
 }
@@ -65,6 +65,14 @@ void LcdSegment_SetPage(LcdSegment* segment, uint8_t page) {
     segment->x = page;
 }
 
+void LcdSegment_SetStartLine(LcdSegment* segment, uint8_t startLine) {
+    segment->startLine = startLine;
+}
+
 void LcdSegment_CopyVram(LcdSegment* segment, uint8_t* buffer) {
-    memcpy(buffer, segment->vram, sizeof(uint8_t) * LCD_SEGMENT_SIZE);
+    for(size_t x = 0; x < LCD_SEGMENT_ROWS; x++) {
+        for(size_t y = 0; y < LCD_SEGMENT_COLUMNS; y++) {
+            buffer[x * LCD_SEGMENT_COLUMNS + y] = segment->vram[x * LCD_SEGMENT_COLUMNS + y];
+        }
+    }
 }
