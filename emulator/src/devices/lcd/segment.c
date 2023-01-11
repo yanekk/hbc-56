@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdbool.h>
+#include <string.h>
 
 #include "segment.h"
 
@@ -15,7 +16,7 @@ LcdSegment* LcdSegment_Create() {
     segment->state = LCD_STATE_OFF;
     segment->y = 0;
     segment->x = 0;
-    segment->vram = calloc(sizeof(uint8_t),  LCD_SEGMENT_COLUMNS * LCD_SEGMENT_ROWS);
+    segment->vram = calloc(sizeof(uint8_t),  LCD_SEGMENT_SIZE);
     return segment;
 }
 
@@ -58,4 +59,8 @@ void LcdSegment_WriteData(LcdSegment* segment, uint8_t data) {
 
 void LcdSegment_SetAddress(LcdSegment* segment, uint8_t y) {
     segment->y = y;
+}
+
+void LcdSegment_CopyVram(LcdSegment* segment, uint8_t* buffer) {
+    memcpy(buffer, segment->vram, sizeof(uint8_t) * LCD_SEGMENT_SIZE);
 }

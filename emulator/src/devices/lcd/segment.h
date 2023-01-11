@@ -21,6 +21,7 @@ extern "C" {
 
 #define LCD_SEGMENT_COLUMNS 64
 #define LCD_SEGMENT_ROWS 8
+#define LCD_SEGMENT_SIZE LCD_SEGMENT_COLUMNS * LCD_SEGMENT_ROWS
 
 typedef enum {
     LCD_STATE_OFF,
@@ -45,6 +46,8 @@ uint8_t LcdSegment_ReadData(LcdSegment* segment, bool debug);
 void LcdSegment_WriteData(LcdSegment* segment, uint8_t data);
 
 void LcdSegment_SetAddress(LcdSegment* segment, uint8_t y);
+
+void LcdSegment_CopyVram(LcdSegment* segment, uint8_t* buffer);
 
 #ifdef __cplusplus
 }

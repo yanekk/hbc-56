@@ -185,10 +185,10 @@ void test_writeBuffer(void)
     LcdSegment_WriteData(segment, 10);
 
 
-    uint8_t* buffer[LCD_SEGMENT_COLUMNS * LCD_SEGMENT_ROWS] = {0};
+    uint8_t buffer[LCD_SEGMENT_COLUMNS * LCD_SEGMENT_ROWS] = {0};
 
     // act
-    LcdSegment_GetVram(segment, &buffer);
+    LcdSegment_CopyVram(segment, (uint8_t*)&buffer);
 
     // assert
     TEST_ASSERT(buffer[0] == 1);
@@ -214,5 +214,6 @@ TEST_LIST = {
     { "test_writeData_addressOverflow", test_writeData_addressOverflow },
     { "test_readData_addressOverflow", test_readData_addressOverflow },
     { "test_readData_debugFlagNoAddressIncrease", test_readData_debugFlagNoAddressIncrease },
+    { "test_writeBuffer", test_writeBuffer },
     { NULL, NULL }     /* zeroed record marking the end of the list */
 };
