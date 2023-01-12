@@ -3,6 +3,8 @@
 #include <string.h>
 
 #include "segment.h"
+#include "utils/matrix.h"
+#include "utils/array.h"
 
 struct LcdSegment {
     LcdState state;
@@ -21,6 +23,10 @@ LcdSegment* LcdSegment_Create() {
 }
 
 bool LcdSegment_Destroy(LcdSegment* segment) {
+    if(segment->vram) {
+        free(segment->vram);
+        segment->vram = NULL;
+    }
     if(segment != NULL) {
         free(segment);
     }
@@ -70,9 +76,19 @@ void LcdSegment_SetStartLine(LcdSegment* segment, uint8_t startLine) {
 }
 
 void LcdSegment_CopyVram(LcdSegment* segment, uint8_t* buffer) {
-    for(size_t x = 0; x < LCD_SEGMENT_ROWS; x++) {
-        for(size_t y = 0; y < LCD_SEGMENT_COLUMNS; y++) {
-            buffer[x * LCD_SEGMENT_COLUMNS + y] = segment->vram[x * LCD_SEGMENT_COLUMNS + y];
+    memcpy(buffer, segment->vram, sizeof(uint8_t) * LCD_SEGMENT_SIZE);
+    Matrix vramMatrix = {
+        .data = buffer,
+        .height = LCD_SEGMENT_ROWS,
+        .width = LCD_SEGMENT_COLUMNS
+    };
+
+    uint8_t columnData[LCD_SEGMENT_COLUMNS];
+    for(uint8_t columnIndex = 0; columnIndex < LCD_SEGMENT_COLUMNS; columnIndex++) {
+        Matrix_GetColumn(&vramMatrix, columnIndex, columnData);
+        for(uint8_t i = 0; i < segment->startLine; i++) {
+            Array_ShiftRight(columnData, LCD_SEGMENT_ROWS, columnData);
         }
+        Matrix_SetColumn(&vramMatrix, columnIndex, columnData);
     }
 }

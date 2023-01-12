@@ -262,38 +262,18 @@ void test_setStartLine_pushesDataForwardWithinOneByte(void)
 
     uint8_t buffer[LCD_SEGMENT_SIZE] = {0};
     LcdSegment_CopyVram(segment, (uint8_t*)&buffer);
-    
-    printf("\n");
-    for (uint8_t row = 0; row < LCD_SEGMENT_ROWS; row++) {
-        for (uint8_t column = 0; column < LCD_SEGMENT_COLUMNS; column++) {
-            uint8_t data = buffer[row*LCD_SEGMENT_COLUMNS+column];
-            if(data < 16)
-                printf("0");
-            printf("%x ", buffer[row*LCD_SEGMENT_COLUMNS+column]);
-        }   
-        printf("\n");
-    }
 
     // act
     LcdSegment_SetStartLine(segment, 8);
 
     // assert
     LcdSegment_CopyVram(segment, (uint8_t*)&buffer);
-    printf("\n");
     for (uint8_t row = 0; row < LCD_SEGMENT_ROWS; row++) {
         for (uint8_t column = 0; column < LCD_SEGMENT_COLUMNS; column++) {
-            uint8_t data = buffer[row*LCD_SEGMENT_COLUMNS+column];
-            if(data < 16)
-                printf("0");
-            printf("%x ", buffer[row*LCD_SEGMENT_COLUMNS+column]);
+            uint8_t previousRow = row == 0 ? LCD_SEGMENT_ROWS-1 : row-1;
+            TEST_ASSERT(buffer[row*LCD_SEGMENT_COLUMNS+column] == data[previousRow*LCD_SEGMENT_COLUMNS+column]);
         }   
-        printf("\n");
     }
-    // for (uint8_t startLine8 = 0; startLine8 < 8; startLine8++) {
-    //     for(uint8_t page = 0; page < 8; page++) {
-    //         TEST_ASSERT(buffer[page * LCD_SEGMENT_COLUMNS] == data[startLine8][page]);
-    //     }
-    // }
 }
 
 TEST_LIST = {
