@@ -399,83 +399,6 @@ void test_shiftRightWholeTwoBytes() {
     TEST_ASSERT(results[30] == 0xff && results[31] == 0x00);
 }
 
-typedef struct {
-    uint8_t* data;
-    uint8_t width, height;
-} Matrix;
-
-void getColumn(Matrix* matrix, uint8_t columnIndex, uint8_t* buffer) {
-    for(uint8_t row = 0; row < matrix->height; row++) {
-        buffer[row] = matrix->data[row * matrix->width + columnIndex];
-    }
-}
-
-void test_getColumn() {
-    // arrange
-    uint8_t matrixData[6] = {
-        11, 22,
-        12, 23,
-        13, 24,
-    };
-    Matrix matrix = {
-        .data = (uint8_t*)matrixData,
-        .height = 3,
-        .width = 2
-    };
-
-    uint8_t expected[2][3] = {
-        { 11, 12, 13 },
-        { 22, 23, 24 },
-    };
-    uint8_t buffer[3];
-
-    // act
-    for(uint8_t column = 0; column < 2; column++) {
-        getColumn(&matrix, column, buffer);
-        for(uint8_t i = 0; i < 2; i++){
-            // assert
-            TEST_ASSERT(buffer[i] == expected[column][i]);
-        }
-    }
-}
-
-void setColumn(Matrix* matrix, uint8_t columnIndex, uint8_t* data) {
-    for(uint8_t row = 0; row < matrix->height; row++) {
-        matrix->data[row] = data[row * matrix->width + columnIndex];
-    }
-}
-
-void test_setColumn() {
-    // arrange
-    uint8_t matrixData[6] = {
-        0x01, 0x04,
-        0x02, 0x05,
-        0x03, 0x06,
-    };
-    Matrix matrix = {
-        .data = (uint8_t*)matrixData,
-        .height = 3,
-        .width = 2
-    };
-
-    uint8_t newData[3] = {
-        0x0F,
-        0x0A,
-        0x0B,
-    };
-
-    // act
-    setColumn(&matrix, 0, newData);
-
-    // assert
-    uint8_t buffer[3];
-    getColumn(&matrix, 0, buffer);
-
-    TEST_ASSERT(buffer[0] == newData[0]);
-    TEST_ASSERT(buffer[1] == newData[1]);
-    TEST_ASSERT(buffer[2] == newData[2]);
-}
-
 // void shiftLeftMultiple(uint8_t* array, uint8_t arrayCount, uint8_t* buffer) {
 //     uint32_t tmp = (uint32_t)array[0] << shift;
 //     uint16_t result = (uint16_t)tmp;
@@ -518,9 +441,6 @@ TEST_LIST = {
     { "test_shiftRightMultiple_withCarry", test_shiftRightMultiple_withCarry },
     { "test_shiftRightMultiple_withoutCarry", test_shiftRightMultiple_withoutCarry },
     { "test_shiftRightWholeTwoBytes", test_shiftRightWholeTwoBytes },
-    { "test_getColumn", test_getColumn },
-
-    //{ "test_shiftMultipleBytes", test_shiftMultipleBytes },
     // { "test_setStartLine_pushesDataForwardWithinOneByte", test_setStartLine_pushesDataForwardWithinOneByte },
     { NULL, NULL }     /* zeroed record marking the end of the list */
 };
