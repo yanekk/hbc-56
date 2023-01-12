@@ -240,39 +240,61 @@ void test_setPage_storesDataAtRightPosition(void)
     }
 }
 
-// void test_setStartLine_pushesDataForwardWithinOneByte(void)
-// {
-//     // arrange
-//     LcdSegment* segment = LcdSegment_Create();
-//     uint8_t buffer[LCD_SEGMENT_COLUMNS * LCD_SEGMENT_ROWS] = {0};
-//     uint8_t data[8][8] = {
-//         {12, 23, 34, 45, 56, 67, 78, 89},
-//         {89, 12, 23, 34, 45, 56, 67, 78},
-//         {78, 89, 12, 23, 34, 45, 56, 67},
-//         {67, 78, 89, 12, 23, 34, 45, 56},
-//         {56, 67, 78, 89, 12, 23, 34, 45},
-//         {45, 56, 67, 78, 89, 12, 23, 34},
-//         {34, 45, 56, 67, 78, 89, 12, 23},
-//         {23, 34, 45, 56, 67, 78, 89, 12},
-//     };
+void test_setStartLine_pushesDataForwardWithinOneByte(void)
+{
+    // arrange
+    LcdSegment* segment = LcdSegment_Create();
+    uint8_t data[LCD_SEGMENT_SIZE];
+
+    for (uint8_t x = 0; x < LCD_SEGMENT_ROWS; x++) {
+        for (uint8_t y = 0; y < LCD_SEGMENT_COLUMNS; y++) {
+            data[x * LCD_SEGMENT_COLUMNS + y] = rand();
+        }        
+    }
+
+    for (uint8_t x = 0; x < LCD_SEGMENT_ROWS; x++) {
+        LcdSegment_SetPage(segment, x);
+        LcdSegment_SetAddress(segment, 0);
+        for (uint8_t y = 0; y < LCD_SEGMENT_COLUMNS; y++) {
+            LcdSegment_WriteData(segment, data[x*LCD_SEGMENT_COLUMNS + y]);
+        }        
+    }
+
+    uint8_t buffer[LCD_SEGMENT_SIZE] = {0};
+    LcdSegment_CopyVram(segment, (uint8_t*)&buffer);
     
-//     for (uint8_t x = 0; x < 8; x++) {
-//         LcdSegment_SetPage(segment, x);
-//         LcdSegment_SetAddress(segment, 0);
-//         LcdSegment_WriteData(segment, data[0][x]);
-//     }
+    printf("\n");
+    for (uint8_t row = 0; row < LCD_SEGMENT_ROWS; row++) {
+        for (uint8_t column = 0; column < LCD_SEGMENT_COLUMNS; column++) {
+            uint8_t data = buffer[row*LCD_SEGMENT_COLUMNS+column];
+            if(data < 16)
+                printf("0");
+            printf("%x ", buffer[row*LCD_SEGMENT_COLUMNS+column]);
+        }   
+        printf("\n");
+    }
 
-//     for (uint8_t startLine8 = 0; startLine8 < 8; startLine8++) {
-//         // act
-//         LcdSegment_SetStartLine(segment, 8 * startLine8);
+    // act
+    LcdSegment_SetStartLine(segment, 8);
 
-//         // assert
-//         LcdSegment_CopyVram(segment, (uint8_t*)&buffer);
-//         for(uint8_t page = 0; page < 8; page++) {
-//             TEST_ASSERT(buffer[page * LCD_SEGMENT_COLUMNS] == data[startLine8][page]);
-//         }
-//     }
-// }
+    // assert
+    LcdSegment_CopyVram(segment, (uint8_t*)&buffer);
+    printf("\n");
+    for (uint8_t row = 0; row < LCD_SEGMENT_ROWS; row++) {
+        for (uint8_t column = 0; column < LCD_SEGMENT_COLUMNS; column++) {
+            uint8_t data = buffer[row*LCD_SEGMENT_COLUMNS+column];
+            if(data < 16)
+                printf("0");
+            printf("%x ", buffer[row*LCD_SEGMENT_COLUMNS+column]);
+        }   
+        printf("\n");
+    }
+    // for (uint8_t startLine8 = 0; startLine8 < 8; startLine8++) {
+    //     for(uint8_t page = 0; page < 8; page++) {
+    //         TEST_ASSERT(buffer[page * LCD_SEGMENT_COLUMNS] == data[startLine8][page]);
+    //     }
+    // }
+}
 
 TEST_LIST = {
     { "test_createSegment", test_createSegment },
@@ -289,6 +311,6 @@ TEST_LIST = {
     { "test_readData_debugFlagNoAddressIncrease", test_readData_debugFlagNoAddressIncrease },
     { "test_copyVram", test_copyVram },
     { "test_setPage_storesDataAtRightPosition", test_setPage_storesDataAtRightPosition },
-    // { "test_setStartLine_pushesDataForwardWithinOneByte", test_setStartLine_pushesDataForwardWithinOneByte },
+    { "test_setStartLine_pushesDataForwardWithinOneByte", test_setStartLine_pushesDataForwardWithinOneByte },
     { NULL, NULL }     /* zeroed record marking the end of the list */
 };
