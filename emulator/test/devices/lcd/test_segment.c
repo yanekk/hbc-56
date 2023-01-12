@@ -328,6 +328,72 @@ void test_shiftRightWithCarry_notReturnCarry() {
     TEST_ASSERT(carry == false);
 }
 
+void shiftRightMultiple(uint8_t* initial, uint8_t* actual, uint8_t size) {
+    uint8_t _ = 0;
+    bool carry = shiftRightWithCarry(initial[size-1], false, &_);
+    for(uint8_t i = 0; i < size; i++) {
+        carry = shiftRightWithCarry(initial[i], carry, &actual[i]);
+    }
+}
+
+void test_shiftRightMultiple_withCarry() {
+    // arrange
+    uint8_t initial[2] = { 0b00000111, 0b00001111 };
+    uint8_t actual[2] = {0};
+
+    // act
+    shiftRightMultiple((uint8_t*)initial, (uint8_t*)actual, 2);
+
+    // assert
+    TEST_ASSERT(actual[0] == 0b10000011 && actual[1] == 0b10000111);
+}
+
+void test_shiftRightMultiple_withoutCarry() {
+    // arrange
+    uint8_t initial[2] = { 0b00000111, 0b00001110 };
+    uint8_t actual[2] = {0};
+
+    // act
+    shiftRightMultiple((uint8_t*)initial, (uint8_t*)actual, 2);
+
+    // assert
+    TEST_ASSERT(actual[0] == 0b00000011 && actual[1] == 0b10000111);
+}
+
+#define BYTES_COUNT 2
+void test_shiftRightWholeTwoBytes() {
+    // arrange
+    uint8_t initial[BYTES_COUNT] = { 0xFF, 0x00 };
+    uint8_t results[32];
+
+    // act
+    uint8_t current[BYTES_COUNT] = {0};
+
+    for(uint8_t j = 0; j < 16; j++) {
+        shiftRightMultiple((uint8_t*)initial, (uint8_t*)current, BYTES_COUNT);
+        for (uint8_t i = 0; i < BYTES_COUNT; i++) {
+            results[j * BYTES_COUNT + i] = current[i];
+        }
+        memcpy(initial, current, BYTES_COUNT);
+    }
+    TEST_ASSERT(results[0] == 0x7f && results[1] == 0x80);
+    TEST_ASSERT(results[2] == 0x3f && results[3] == 0xC0);
+    TEST_ASSERT(results[4] == 0x1f && results[5] == 0xE0);
+    TEST_ASSERT(results[6] == 0x0f && results[7] == 0xF0);
+    TEST_ASSERT(results[8] == 0x07 && results[9] == 0xF8);
+    TEST_ASSERT(results[10] == 0x03 && results[11] == 0xFC);
+    TEST_ASSERT(results[12] == 0x01 && results[13] == 0xFE);
+    TEST_ASSERT(results[14] == 0x00 && results[15] == 0xFF);
+    TEST_ASSERT(results[16] == 0x80 && results[17] == 0x7F);
+    TEST_ASSERT(results[18] == 0xc0 && results[19] == 0x3F);
+    TEST_ASSERT(results[20] == 0xe0 && results[21] == 0x1F);
+    TEST_ASSERT(results[22] == 0xf0 && results[23] == 0x0F);
+    TEST_ASSERT(results[24] == 0xf8 && results[25] == 0x07);
+    TEST_ASSERT(results[26] == 0xfc && results[27] == 0x03);
+    TEST_ASSERT(results[28] == 0xfe && results[29] == 0x01);
+    TEST_ASSERT(results[30] == 0xff && results[31] == 0x00);
+}
+
 // void shiftLeftMultiple(uint8_t* array, uint8_t arrayCount, uint8_t* buffer) {
 //     uint32_t tmp = (uint32_t)array[0] << shift;
 //     uint16_t result = (uint16_t)tmp;
@@ -367,6 +433,9 @@ TEST_LIST = {
     { "test_shiftRightWithCarry_withoutCarry", test_shiftRightWithCarry_withoutCarry },
     { "test_shiftRightWithCarry_returnsCarry", test_shiftRightWithCarry_returnsCarry },
     { "test_shiftRightWithCarry_notReturnCarry", test_shiftRightWithCarry_notReturnCarry },
+    { "test_shiftRightMultiple_withCarry", test_shiftRightMultiple_withCarry },
+    { "test_shiftRightMultiple_withoutCarry", test_shiftRightMultiple_withoutCarry },
+    { "test_shiftRightWholeTwoBytes", test_shiftRightWholeTwoBytes },
     //{ "test_shiftMultipleBytes", test_shiftMultipleBytes },
     // { "test_setStartLine_pushesDataForwardWithinOneByte", test_setStartLine_pushesDataForwardWithinOneByte },
     { NULL, NULL }     /* zeroed record marking the end of the list */
