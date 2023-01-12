@@ -328,12 +328,17 @@ void test_shiftRightWithCarry_notReturnCarry() {
     TEST_ASSERT(carry == false);
 }
 
-void shiftRightMultiple(uint8_t* initial, uint8_t* actual, uint8_t size) {
+void shiftRightMultiple(uint8_t* input, uint8_t size, uint8_t* output) {
     uint8_t _ = 0;
-    bool carry = shiftRightWithCarry(initial[size-1], false, &_);
+
+    uint8_t* inputCopy = malloc(sizeof(uint8_t) * size);
+    memcpy(inputCopy, input, sizeof(uint8_t) * size);
+
+    bool carry = shiftRightWithCarry(inputCopy[size-1], false, &_);
     for(uint8_t i = 0; i < size; i++) {
-        carry = shiftRightWithCarry(initial[i], carry, &actual[i]);
+        carry = shiftRightWithCarry(inputCopy[i], carry, &output[i]);
     }
+    free(inputCopy);
 }
 
 void test_shiftRightMultiple_withCarry() {
@@ -342,7 +347,7 @@ void test_shiftRightMultiple_withCarry() {
     uint8_t actual[2] = {0};
 
     // act
-    shiftRightMultiple((uint8_t*)initial, (uint8_t*)actual, 2);
+    shiftRightMultiple((uint8_t*)initial, 2, (uint8_t*)actual);
 
     // assert
     TEST_ASSERT(actual[0] == 0b10000011 && actual[1] == 0b10000111);
@@ -354,7 +359,7 @@ void test_shiftRightMultiple_withoutCarry() {
     uint8_t actual[2] = {0};
 
     // act
-    shiftRightMultiple((uint8_t*)initial, (uint8_t*)actual, 2);
+    shiftRightMultiple((uint8_t*)initial, 2, (uint8_t*)actual);
 
     // assert
     TEST_ASSERT(actual[0] == 0b00000011 && actual[1] == 0b10000111);
@@ -370,7 +375,7 @@ void test_shiftRightWholeTwoBytes() {
     uint8_t current[BYTES_COUNT] = {0};
 
     for(uint8_t j = 0; j < 16; j++) {
-        shiftRightMultiple((uint8_t*)initial, (uint8_t*)current, BYTES_COUNT);
+        shiftRightMultiple((uint8_t*)initial, BYTES_COUNT, (uint8_t*)current);
         for (uint8_t i = 0; i < BYTES_COUNT; i++) {
             results[j * BYTES_COUNT + i] = current[i];
         }
@@ -392,6 +397,83 @@ void test_shiftRightWholeTwoBytes() {
     TEST_ASSERT(results[26] == 0xfc && results[27] == 0x03);
     TEST_ASSERT(results[28] == 0xfe && results[29] == 0x01);
     TEST_ASSERT(results[30] == 0xff && results[31] == 0x00);
+}
+
+typedef struct {
+    uint8_t* data;
+    uint8_t width, height;
+} Matrix;
+
+void getColumn(Matrix* matrix, uint8_t columnIndex, uint8_t* buffer) {
+    for(uint8_t row = 0; row < matrix->height; row++) {
+        buffer[row] = matrix->data[row * matrix->width + columnIndex];
+    }
+}
+
+void test_getColumn() {
+    // arrange
+    uint8_t matrixData[6] = {
+        11, 22,
+        12, 23,
+        13, 24,
+    };
+    Matrix matrix = {
+        .data = (uint8_t*)matrixData,
+        .height = 3,
+        .width = 2
+    };
+
+    uint8_t expected[2][3] = {
+        { 11, 12, 13 },
+        { 22, 23, 24 },
+    };
+    uint8_t buffer[3];
+
+    // act
+    for(uint8_t column = 0; column < 2; column++) {
+        getColumn(&matrix, column, buffer);
+        for(uint8_t i = 0; i < 2; i++){
+            // assert
+            TEST_ASSERT(buffer[i] == expected[column][i]);
+        }
+    }
+}
+
+void setColumn(Matrix* matrix, uint8_t columnIndex, uint8_t* data) {
+    for(uint8_t row = 0; row < matrix->height; row++) {
+        matrix->data[row] = data[row * matrix->width + columnIndex];
+    }
+}
+
+void test_setColumn() {
+    // arrange
+    uint8_t matrixData[6] = {
+        0x01, 0x04,
+        0x02, 0x05,
+        0x03, 0x06,
+    };
+    Matrix matrix = {
+        .data = (uint8_t*)matrixData,
+        .height = 3,
+        .width = 2
+    };
+
+    uint8_t newData[3] = {
+        0x0F,
+        0x0A,
+        0x0B,
+    };
+
+    // act
+    setColumn(&matrix, 0, newData);
+
+    // assert
+    uint8_t buffer[3];
+    getColumn(&matrix, 0, buffer);
+
+    TEST_ASSERT(buffer[0] == newData[0]);
+    TEST_ASSERT(buffer[1] == newData[1]);
+    TEST_ASSERT(buffer[2] == newData[2]);
 }
 
 // void shiftLeftMultiple(uint8_t* array, uint8_t arrayCount, uint8_t* buffer) {
@@ -436,6 +518,8 @@ TEST_LIST = {
     { "test_shiftRightMultiple_withCarry", test_shiftRightMultiple_withCarry },
     { "test_shiftRightMultiple_withoutCarry", test_shiftRightMultiple_withoutCarry },
     { "test_shiftRightWholeTwoBytes", test_shiftRightWholeTwoBytes },
+    { "test_getColumn", test_getColumn },
+
     //{ "test_shiftMultipleBytes", test_shiftMultipleBytes },
     // { "test_setStartLine_pushesDataForwardWithinOneByte", test_setStartLine_pushesDataForwardWithinOneByte },
     { NULL, NULL }     /* zeroed record marking the end of the list */
