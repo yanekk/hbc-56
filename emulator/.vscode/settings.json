@@ -12,7 +12,11 @@
         "iterator": "c",
         "chrono": "c",
         "__locale": "c",
-        "*.md": "c"
+        "*.md": "c",
+        "deque": "c",
+        "map": "c",
+        "set": "c",
+        "ios": "c"
     },
     "C_Cpp.default.defines": [
         "VR_6502_EMU_STATIC=1"

@@ -101,7 +101,7 @@ test: $(TEST_OBJECT_FILE) $(TEST_INCLUDES_OBJECTS)
 	mkdir -p $(dir $(TEST_OBJECT_FILE))
 	mkdir -p $(BIN_DIR)
 	$(GCC) -g $(MODULE_CFLAGS) $(CFLAGS_W) $(INCLUDES_TEST) -I$(INCLUDE_PATH) -c $(TEST_SOURCE_FILE) -o $(TEST_OBJECT_FILE)
-	$(GPP) -g $(CFLAGS_W) $(TEST_OBJECT_FILE) $(TEST_INCLUDES_OBJECTS) -o $(BIN_DIR)/run_tests
+	$(GPP) -g $(CFLAGS_W) $(TEST_OBJECT_FILE) $(TEST_INCLUDES_OBJECTS) -o $(BIN_DIR)/run_tests -lmingw32 -lsdl2main -lsdl2
 	$(BIN_DIR)/run_tests.exe
 endif
 

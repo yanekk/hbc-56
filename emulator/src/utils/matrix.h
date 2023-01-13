@@ -25,6 +25,7 @@ typedef struct {
 
 void Matrix_GetColumn(Matrix* matrix, uint8_t columnIndex, uint8_t* buffer);
 void Matrix_SetColumn(Matrix* matrix, uint8_t columnIndex, uint8_t* data);
+void Matrix_MergeToBitArray(Matrix* matrixA, Matrix* matrixB, uint32_t* bitArray);
 
 #ifdef __cplusplus
 }

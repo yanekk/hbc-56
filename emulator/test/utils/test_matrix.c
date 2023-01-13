@@ -61,8 +61,61 @@ void test_setColumn() {
     TEST_ASSERT(buffer[2] == newData[2]);
 }
 
+void test_mergeToBitArray_2x2() {
+    // arrange
+    uint8_t dataA[2] = {
+        0b00111010,
+        0b10100011
+    };
+    Matrix matrixA = {
+        .height = 2,
+        .width  = 1,
+        .data   = dataA
+    };
+
+    uint8_t dataB[2] = {
+        0b10101010,
+        0b01010101
+    };
+    Matrix matrixB = {
+        .height = 2,
+        .width  = 1,
+        .data   = dataB
+    };
+
+    uint32_t expectedBitArray[32] = {
+        0, 1, 
+        0, 0, 
+        1, 1, 
+        1, 0, 
+        1, 1, 
+        0, 0, 
+        1, 1, 
+        0, 0, 
+        1, 0, 
+        0, 1,
+        1, 0, 
+        0, 1,
+        0, 0, 
+        0, 1, 
+        1, 0, 
+        1, 1,
+    };
+
+    // act
+    uint32_t actualBitArray[64];
+    Matrix_MergeToBitArray(&matrixA, &matrixB, actualBitArray);
+
+    // assert
+    for (size_t i = 0; i < 32; i++)
+    {   
+        TEST_ASSERT(actualBitArray[i] == expectedBitArray[i]);
+    }
+}
+
 TEST_LIST = {
     { "test_getColumn", test_getColumn },
     { "test_setColumn", test_setColumn },
+    { "test_mergeToBitArray_2x2", test_mergeToBitArray_2x2 },
     { NULL, NULL }     /* zeroed record marking the end of the list */
 };
