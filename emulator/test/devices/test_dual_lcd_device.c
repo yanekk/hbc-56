@@ -72,39 +72,31 @@ void test_writeDevice_turnOnSegmentB(void)
 void test_writeDevice_turnOffSegmentA(void)
 {
     // arrange
-    HBC56Device lcdDevice = createDualLcdDevice(LCD_SEGMENT_A, LCD_SEGMENT_B);
-    writeDevice(&lcdDevice, LCD_SEGMENT_A_CMD, CMD_DISPLAY_ON);
-    writeDevice(&lcdDevice, LCD_SEGMENT_B_CMD, CMD_DISPLAY_ON);
+    initTestDevice();
+    writeTestDevice(LCD_SEGMENT_A_CMD, CMD_DISPLAY_ON);
+    writeTestDevice(LCD_SEGMENT_B_CMD, CMD_DISPLAY_ON);
 
     // act
-    writeDevice(&lcdDevice, LCD_SEGMENT_A_CMD, CMD_DISPLAY_OFF);
+    writeTestDevice(LCD_SEGMENT_A_CMD, CMD_DISPLAY_OFF);
 
     // assert
-    uint8_t result;
-    readDevice(&lcdDevice, LCD_SEGMENT_A_CMD, &result, false);
-    TEST_ASSERT((result & CMD_STATUS_ON_OFF) == 0);
-
-    readDevice(&lcdDevice, LCD_SEGMENT_B_CMD, &result, false);
-    TEST_ASSERT((result & CMD_STATUS_ON_OFF) != 0);
+    TEST_ASSERT((readTestDevice(LCD_SEGMENT_A_CMD) & CMD_STATUS_ON_OFF) == 0);
+    TEST_ASSERT((readTestDevice(LCD_SEGMENT_B_CMD) & CMD_STATUS_ON_OFF) != 0);
 }
 
 void test_writeDevice_turnOffSegmentB(void)
 {
     // arrange
-    HBC56Device lcdDevice = createDualLcdDevice(LCD_SEGMENT_A, LCD_SEGMENT_B);
-    writeDevice(&lcdDevice, LCD_SEGMENT_A_CMD, CMD_DISPLAY_ON);
-    writeDevice(&lcdDevice, LCD_SEGMENT_B_CMD, CMD_DISPLAY_ON);
+    initTestDevice();
+    writeTestDevice(LCD_SEGMENT_A_CMD, CMD_DISPLAY_ON);
+    writeTestDevice(LCD_SEGMENT_B_CMD, CMD_DISPLAY_ON);
 
     // act
-    writeDevice(&lcdDevice, LCD_SEGMENT_B_CMD, CMD_DISPLAY_OFF);
+    writeTestDevice(LCD_SEGMENT_B_CMD, CMD_DISPLAY_OFF);
 
     // assert
-    uint8_t result;
-    readDevice(&lcdDevice, LCD_SEGMENT_A_CMD, &result, false);
-    TEST_ASSERT((result & CMD_STATUS_ON_OFF) != 0);
-
-    readDevice(&lcdDevice, LCD_SEGMENT_B_CMD, &result, false);
-    TEST_ASSERT((result &  CMD_STATUS_ON_OFF) == 0);
+    TEST_ASSERT((readTestDevice(LCD_SEGMENT_A_CMD) & CMD_STATUS_ON_OFF) != 0);
+    TEST_ASSERT((readTestDevice(LCD_SEGMENT_B_CMD) & CMD_STATUS_ON_OFF) == 0);
 }
 
 TEST_LIST = {
