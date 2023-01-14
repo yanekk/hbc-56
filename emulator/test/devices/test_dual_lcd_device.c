@@ -29,15 +29,15 @@ void test_createDevice_nameIsSet(void)
 
 HBC56Device lcdDevice;
 
-void init() {
+void initTestDevice() {
     lcdDevice = createDualLcdDevice(LCD_SEGMENT_A, LCD_SEGMENT_B);
 }
 
-void write(uint16_t address, uint8_t data) {
+void writeTestDevice(uint16_t address, uint8_t data) {
     writeDevice(&lcdDevice, address, data);
 }
 
-uint8_t read(uint16_t address) {
+uint8_t readTestDevice(uint16_t address) {
     uint8_t result;
     readDevice(&lcdDevice, address, &result, false);
     return result;
@@ -46,14 +46,14 @@ uint8_t read(uint16_t address) {
 void test_writeDevice_turnOnSegmentA(void)
 {
     // arrange
-    init();
+    initTestDevice();
 
     // act
-    write(LCD_SEGMENT_A_CMD, CMD_DISPLAY_ON);
+    writeTestDevice(LCD_SEGMENT_A_CMD, CMD_DISPLAY_ON);
 
     // assert
-    TEST_ASSERT((read(LCD_SEGMENT_A_CMD) & CMD_STATUS_ON_OFF) != 0);
-    TEST_ASSERT((read(LCD_SEGMENT_B_CMD) & CMD_STATUS_ON_OFF) == 0);
+    TEST_ASSERT((readTestDevice(LCD_SEGMENT_A_CMD) & CMD_STATUS_ON_OFF) != 0);
+    TEST_ASSERT((readTestDevice(LCD_SEGMENT_B_CMD) & CMD_STATUS_ON_OFF) == 0);
 }
 
 void test_writeDevice_turnOnSegmentB(void)
