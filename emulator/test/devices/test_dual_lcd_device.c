@@ -59,18 +59,14 @@ void test_writeDevice_turnOnSegmentA(void)
 void test_writeDevice_turnOnSegmentB(void)
 {
     // arrange
-    HBC56Device lcdDevice = createDualLcdDevice(LCD_SEGMENT_A, LCD_SEGMENT_B);
+    initTestDevice();
 
     // act
-    writeDevice(&lcdDevice, LCD_SEGMENT_B_CMD, CMD_DISPLAY_ON);
+    writeTestDevice(LCD_SEGMENT_B_CMD, CMD_DISPLAY_ON);
 
     // assert
-    uint8_t result;
-    readDevice(&lcdDevice, LCD_SEGMENT_A_CMD, &result, false);
-    TEST_ASSERT((result & CMD_STATUS_ON_OFF) == 0);
-
-    readDevice(&lcdDevice, LCD_SEGMENT_B_CMD, &result, false);
-    TEST_ASSERT((result &  CMD_STATUS_ON_OFF) != 0);
+    TEST_ASSERT((readTestDevice(LCD_SEGMENT_A_CMD) & CMD_STATUS_ON_OFF) == 0);
+    TEST_ASSERT((readTestDevice(LCD_SEGMENT_B_CMD) & CMD_STATUS_ON_OFF) != 0);
 }
 
 void test_writeDevice_turnOffSegmentA(void)
