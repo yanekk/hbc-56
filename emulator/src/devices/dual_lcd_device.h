@@ -15,6 +15,7 @@ extern "C" {
 
 #define LCD_CMD_DISPLAY_ON_OFF_VALUE_MASK 0b00000001
 #define LCD_CMD_SET_ADDRESS_VALUE_MASK 0b00111111
+#define LCD_CMD_SET_PAGE_VALUE_MASK 0b00000111
 
 HBC56Device createDualLcdDevice(uint16_t segmentAAddress, uint16_t segmentBAddress);
 

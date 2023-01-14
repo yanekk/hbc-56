@@ -158,5 +158,6 @@ TEST_LIST = {
    { "test_writeDevice_turnOffSegmentB", test_writeDevice_turnOffSegmentB },
    { "test_writeDevice_dataCanBeWrittenAndRead", test_writeDevice_dataCanBeWrittenAndRead },
    { "test_setAddress_addressCanBeSet", test_setAddress_addressCanBeSet },
+   { "test_setAddress_pageCanBeSet", test_setAddress_pageCanBeSet },
    { NULL, NULL }     /* zeroed record marking the end of the list */
 };

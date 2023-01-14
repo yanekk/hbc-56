@@ -67,7 +67,6 @@ static uint8_t readDualLcdDevice(HBC56Device* device, uint16_t address, uint8_t*
 
 static uint8_t sendCommand(LcdSegment* segment, uint8_t command) {
     uint8_t commandMask = command & LCD_CMD_MASK;
-    printf("command: %d\n", command);
     switch (commandMask) {
     case LCD_CMD_DISPLAY_ON_OFF_MASK:
         if((command & LCD_CMD_DISPLAY_ON_OFF_VALUE_MASK) == 1) {
@@ -79,6 +78,9 @@ static uint8_t sendCommand(LcdSegment* segment, uint8_t command) {
     
     case LCD_CMD_SET_ADDRESS_MASK:
         LcdSegment_SetAddress(segment, command & LCD_CMD_SET_ADDRESS_VALUE_MASK);
+        break;
+    case LCD_CMD_SET_PAGE_MASK:
+        LcdSegment_SetPage(segment, command & LCD_CMD_SET_PAGE_VALUE_MASK);
         break;
     }
     return 1;
