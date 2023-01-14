@@ -130,6 +130,26 @@ void test_setAddress_addressCanBeSet() {
     TEST_ASSERT(readTestDevice(LCD_SEGMENT_A_DATA) == 0xFA);
 }
 
+void test_setAddress_pageCanBeSet() {
+    // arrange
+    initTestDevice();
+    writeTestDevice(LCD_SEGMENT_A_CMD, CMD_DISPLAY_ON);
+
+    // act
+    writeTestDevice(LCD_SEGMENT_A_CMD, LCD_CMD_SET_PAGE_MASK | 7);
+    writeTestDevice(LCD_SEGMENT_A_DATA, 0xFA);
+    
+
+    // assert
+    writeTestDevice(LCD_SEGMENT_A_CMD, LCD_CMD_SET_PAGE_MASK | 0);
+    writeTestDevice(LCD_SEGMENT_A_CMD, LCD_CMD_SET_ADDRESS_MASK | 0);
+    TEST_ASSERT(readTestDevice(LCD_SEGMENT_A_DATA) == 0);
+
+    writeTestDevice(LCD_SEGMENT_A_CMD, LCD_CMD_SET_PAGE_MASK | 7);
+    writeTestDevice(LCD_SEGMENT_A_CMD, LCD_CMD_SET_ADDRESS_MASK | 0);
+    TEST_ASSERT(readTestDevice(LCD_SEGMENT_A_DATA) == 0xFA);
+}
+
 TEST_LIST = {
    { "test_createDevice_nameIsSet", test_createDevice_nameIsSet },
    { "test_writeDevice_turnOnSegmentA", test_writeDevice_turnOnSegmentA },
