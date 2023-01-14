@@ -60,20 +60,23 @@ static uint8_t writeDualLcdDevice(HBC56Device* device, uint16_t address, uint8_t
     DualLcdDevice* lcdDevice = getDualLcdDevice(device);
     LcdSegment* segment = (address & 0xFF00) == lcdDevice->segmentAAddress ? lcdDevice->segmentA : lcdDevice->segmentB;
     if((address & 0x00FF) == 0) { // cmd
-        uint8_t commandMask = data & LCD_CMD_MASK;
-        switch (commandMask)
-        {
-        case LCD_CMD_DISPLAY_ON_OFF_MASK:
-            if((data & LCD_CMD_DISPLAY_ON_OFF_VALUE_MASK) == 1) {
-                LcdSegment_TurnOn(segment);
-            } else {
-                LcdSegment_TurnOff(segment);
-            }
-            break;
-        }
+        sendCommand(segment, data);
     } else if ((address & 0x00FF) == 1) { // data
     }
     return 1;
+}
+
+static uint8_t sendCommand(LcdSegment* segment, uint8_t command) {
+    uint8_t commandMask = command & LCD_CMD_MASK;
+    switch (commandMask) {
+    case LCD_CMD_DISPLAY_ON_OFF_MASK:
+        if((command & LCD_CMD_DISPLAY_ON_OFF_VALUE_MASK) == 1) {
+            LcdSegment_TurnOn(segment);
+        } else {
+            LcdSegment_TurnOff(segment);
+        }
+        break;
+    }
 }
 
 static void destroyDualLcdDevice(HBC56Device* device) {
