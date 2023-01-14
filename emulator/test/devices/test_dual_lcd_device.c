@@ -2,6 +2,7 @@
 #include "devices/dual_lcd_device.h"
 #include "devices/device.h"
 #include "devices/lcd/segment.h"
+#include "devices/lcd/renderer.h"
 #include "utils/matrix.h"
 
 #define LCD_SEGMENT_A 0x4200
@@ -22,21 +23,21 @@
 #define CMD_STATUS_BUSY_MASK 0b10000000 
 #define CMD_STATUS_ON_OFF    0b00100000
 
-uint32_t renderedData[LCD_DATA_SIZE];
-void LcdRenderer_Render(uint32_t* displayData) {
-    memcpy(renderedData, displayData, sizeof(uint32_t) * LCD_DATA_SIZE);
+LcdRendererImageData renderedData;
+void LcdRenderer_Render(LcdRenderer* renderer, LcdRendererImageData* imageData) {
+    memcpy(renderedData.data, imageData->data, sizeof(imageData->data));
 }
 
 void test_createDevice_nameIsSet(void)
 {
-    const HBC56Device testDevice = createDualLcdDevice(LCD_SEGMENT_A, LCD_SEGMENT_B);
+    const HBC56Device testDevice = createDualLcdDevice(NULL, LCD_SEGMENT_A, LCD_SEGMENT_B);
     TEST_ASSERT(strcmp(testDevice.name, "Dual Graphics LCD") == 0);
 }
 
 HBC56Device lcdDevice;
 
 void initTestDevice() {
-    lcdDevice = createDualLcdDevice(LCD_SEGMENT_A, LCD_SEGMENT_B);
+    lcdDevice = createDualLcdDevice(NULL, LCD_SEGMENT_A, LCD_SEGMENT_B);
 }
 
 void writeTestDevice(uint16_t address, uint8_t data) {
@@ -168,15 +169,15 @@ void test_setAddress_startLineCanBeSet() {
     renderDevice(&lcdDevice);
 
     uint8_t LINE_WIDTH = LCD_SEGMENT_COLUMNS * 2;
-
-    TEST_ASSERT(renderedData[0] == 0);
-    TEST_ASSERT(renderedData[LINE_WIDTH] == 0);
-    TEST_ASSERT(renderedData[LINE_WIDTH*2] == 0);
-    TEST_ASSERT(renderedData[LINE_WIDTH*3] == 0);
-    TEST_ASSERT(renderedData[LINE_WIDTH*4] == 1);
-    TEST_ASSERT(renderedData[LINE_WIDTH*5] == 1);
-    TEST_ASSERT(renderedData[LINE_WIDTH*6] == 1);
-    TEST_ASSERT(renderedData[LINE_WIDTH*7] == 1);
+    
+    TEST_ASSERT(renderedData.data[0] == 0);
+    TEST_ASSERT(renderedData.data[LINE_WIDTH] == 0);
+    TEST_ASSERT(renderedData.data[LINE_WIDTH*2] == 0);
+    TEST_ASSERT(renderedData.data[LINE_WIDTH*3] == 0);
+    TEST_ASSERT(renderedData.data[LINE_WIDTH*4] == 1);
+    TEST_ASSERT(renderedData.data[LINE_WIDTH*5] == 1);
+    TEST_ASSERT(renderedData.data[LINE_WIDTH*6] == 1);
+    TEST_ASSERT(renderedData.data[LINE_WIDTH*7] == 1);
 }
 
 TEST_LIST = {

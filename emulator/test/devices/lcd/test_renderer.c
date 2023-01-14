@@ -46,12 +46,12 @@ void test_renderTexture(void)
     // act
     LcdRenderer* lcdRenderer = LcdRenderer_Create(renderer);
     
-    uint32_t imageData[TEXTURE_WIDTH*TEXTURE_HEIGHT];
+    LcdRendererImageData imageData;
     for(size_t i = 0; i < TEXTURE_WIDTH*TEXTURE_HEIGHT; i++) {
-        imageData[i] = ((uint8_t)rand()) & 1;
+        imageData.data[i] = ((uint8_t)rand()) & 1;
     }
 
-    LcdRenderer_Render(lcdRenderer, imageData);
+    LcdRenderer_Render(lcdRenderer, &imageData);
 
     SDL_Rect dst = { .x = 0, .y = 0, .w = WINDOW_WIDTH, .h = WINDOW_HEIGHT};
 

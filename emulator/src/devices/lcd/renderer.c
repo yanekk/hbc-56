@@ -22,13 +22,13 @@ SDL_Texture* LcdRenderer_GetTexture(LcdRenderer* lcdRenderer) {
     return lcdRenderer->texture;
 }
 
-void LcdRenderer_Render(LcdRenderer* lcdRenderer, uint32_t* bitArray) {
+void LcdRenderer_Render(LcdRenderer* lcdRenderer, LcdRendererImageData* bitArray) {
         uint32_t* pixels;
         int pitch;
 
         SDL_LockTexture(lcdRenderer->texture, NULL, (void**)&pixels, &pitch );
         for(int i = 0; i < TEXTURE_WIDTH * TEXTURE_HEIGHT; i++) {
-            pixels[i] = bitArray[i] ? GREY : LIME_GREEN;
+            pixels[i] = bitArray->data[i] ? GREY : LIME_GREEN;
         }
         SDL_UnlockTexture(lcdRenderer->texture);
 }

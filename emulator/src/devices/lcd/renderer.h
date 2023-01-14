@@ -18,14 +18,17 @@ extern "C" {
 
 #include <stdint.h>
 #include "SDL.h"
+#include "segment.h"
 
 struct LcdRenderer;
 typedef struct LcdRenderer LcdRenderer;
 
+typedef struct LcdRendererImageData { uint32_t data[8192]; } LcdRendererImageData;
+
 LcdRenderer* LcdRenderer_Create(SDL_Renderer* renderer);
 
 SDL_Texture* LcdRenderer_GetTexture(LcdRenderer* renderer);
-void LcdRenderer_Render(LcdRenderer* lcdRenderer, uint32_t* displayData);
+void LcdRenderer_Render(LcdRenderer* lcdRenderer, LcdRendererImageData* displayData);
 
 void LcdRenderer_Destroy(LcdRenderer* renderer);
 

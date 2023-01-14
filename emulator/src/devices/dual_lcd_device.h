@@ -2,6 +2,7 @@
 #define _HBC56_DUAL_LCD_DEVICE_H_
 
 #include "device.h"
+#include "devices/lcd/renderer.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -20,7 +21,7 @@ extern "C" {
 
 #define LCD_DATA_SIZE 2 * (LCD_SEGMENT_ROWS * 8 * LCD_SEGMENT_COLUMNS)
 
-HBC56Device createDualLcdDevice(uint16_t segmentAAddress, uint16_t segmentBAddress);
+HBC56Device createDualLcdDevice(LcdRenderer* renderer, uint16_t segmentAAddress, uint16_t segmentBAddress);
 
 #ifdef __cplusplus
 }

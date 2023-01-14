@@ -13,6 +13,8 @@ typedef struct {
     LcdSegment* segmentB;
     uint16_t segmentBAddress;
 
+    LcdRenderer* renderer;
+
 } DualLcdDevice;
 
 // static void resetDualLcdDevice(HBC56Device*);
@@ -21,7 +23,7 @@ static void renderDualLcdDevice(HBC56Device* device);
 static uint8_t readDualLcdDevice(HBC56Device*, uint16_t, uint8_t*, uint8_t);
 static uint8_t writeDualLcdDevice(HBC56Device*, uint16_t, uint8_t);
 
-HBC56Device createDualLcdDevice(uint16_t segmentAAddress, uint16_t segmentBAddress) {
+HBC56Device createDualLcdDevice(LcdRenderer* renderer, uint16_t segmentAAddress, uint16_t segmentBAddress) {
     HBC56Device device = createDevice("Dual Graphics LCD");
 
     DualLcdDevice* lcd = malloc(sizeof(DualLcdDevice));
@@ -31,6 +33,8 @@ HBC56Device createDualLcdDevice(uint16_t segmentAAddress, uint16_t segmentBAddre
 
     lcd->segmentB = LcdSegment_Create();
     lcd->segmentBAddress = segmentBAddress;
+
+    lcd->renderer = renderer;
 
     device.data = lcd;
     device.destroyFn = &destroyDualLcdDevice;
@@ -132,8 +136,8 @@ static void renderDualLcdDevice(HBC56Device* device) {
     };
     LcdSegment_CopyVram(lcdDevice->segmentB, segmentBBuffer);
 
-    uint32_t displayData[LCD_DATA_SIZE];
-    Matrix_MergeToBitArray(&segmentAMatrix, &segmentBMatrix, displayData);
+    LcdRendererImageData displayData;
+    Matrix_MergeToBitArray(&segmentAMatrix, &segmentBMatrix, displayData.data);
 
-    LcdRenderer_Render(displayData);
+    LcdRenderer_Render(lcdDevice->renderer, &displayData);
 }
