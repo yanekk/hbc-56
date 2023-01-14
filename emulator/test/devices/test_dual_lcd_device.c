@@ -99,11 +99,29 @@ void test_writeDevice_turnOffSegmentB(void)
     TEST_ASSERT((readTestDevice(LCD_SEGMENT_B_CMD) & CMD_STATUS_ON_OFF) == 0);
 }
 
+void test_writeDevice_dataCanBeWrittenAndRead(void)
+{
+    // arrange
+    initTestDevice();
+    writeTestDevice(LCD_SEGMENT_A_CMD, CMD_DISPLAY_ON);
+
+    // act
+    for(uint8_t y = 0; y < LCD_SEGMENT_COLUMNS; y++) {
+        writeTestDevice(LCD_SEGMENT_A_DATA, 0xFF - y);
+    }
+    
+    // assert
+    for(uint8_t y = 0; y < LCD_SEGMENT_COLUMNS; y++) {
+        TEST_ASSERT(readTestDevice(LCD_SEGMENT_A_DATA) == 0xFF - y);
+    }
+}
+
 TEST_LIST = {
    { "test_createDevice_nameIsSet", test_createDevice_nameIsSet },
    { "test_writeDevice_turnOnSegmentA", test_writeDevice_turnOnSegmentA },
    { "test_writeDevice_turnOnSegmentB", test_writeDevice_turnOnSegmentB },
    { "test_writeDevice_turnOffSegmentA", test_writeDevice_turnOffSegmentA },
    { "test_writeDevice_turnOffSegmentB", test_writeDevice_turnOffSegmentB },
+   { "test_writeDevice_dataCanBeWrittenAndRead", test_writeDevice_dataCanBeWrittenAndRead },
    { NULL, NULL }     /* zeroed record marking the end of the list */
 };
