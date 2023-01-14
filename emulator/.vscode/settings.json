@@ -16,7 +16,8 @@
         "deque": "c",
         "map": "c",
         "set": "c",
-        "ios": "c"
+        "ios": "c",
+        "functional": "c"
     },
     "C_Cpp.default.defines": [
         "VR_6502_EMU_STATIC=1"

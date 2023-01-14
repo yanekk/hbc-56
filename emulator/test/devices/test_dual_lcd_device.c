@@ -27,21 +27,33 @@ void test_createDevice_nameIsSet(void)
     TEST_ASSERT(strcmp(testDevice.name, "Dual Graphics LCD") == 0);
 }
 
+HBC56Device lcdDevice;
+
+void init() {
+    lcdDevice = createDualLcdDevice(LCD_SEGMENT_A, LCD_SEGMENT_B);
+}
+
+void write(uint16_t address, uint8_t data) {
+    writeDevice(&lcdDevice, address, data);
+}
+
+uint8_t read(uint16_t address) {
+    uint8_t result;
+    readDevice(&lcdDevice, address, &result, false);
+    return result;
+}
+
 void test_writeDevice_turnOnSegmentA(void)
 {
     // arrange
-    HBC56Device lcdDevice = createDualLcdDevice(LCD_SEGMENT_A, LCD_SEGMENT_B);
+    init();
 
     // act
-    writeDevice(&lcdDevice, LCD_SEGMENT_A_CMD, CMD_DISPLAY_ON);
+    write(LCD_SEGMENT_A_CMD, CMD_DISPLAY_ON);
 
     // assert
-    uint8_t result;
-    readDevice(&lcdDevice, LCD_SEGMENT_A_CMD, &result, false);
-    TEST_ASSERT((result & CMD_STATUS_ON_OFF) != 0);
-
-    readDevice(&lcdDevice, LCD_SEGMENT_B_CMD, &result, false);
-    TEST_ASSERT((result & CMD_STATUS_ON_OFF) == 0);
+    TEST_ASSERT((read(LCD_SEGMENT_A_CMD) & CMD_STATUS_ON_OFF) != 0);
+    TEST_ASSERT((read(LCD_SEGMENT_B_CMD) & CMD_STATUS_ON_OFF) == 0);
 }
 
 void test_writeDevice_turnOnSegmentB(void)
