@@ -17,8 +17,17 @@ extern "C" {
 #endif
 
 #include <stdint.h>
+#include "SDL.h"
 
-void LcdRenderer_Render(uint32_t* displayData);
+struct LcdRenderer;
+typedef struct LcdRenderer LcdRenderer;
+
+LcdRenderer* LcdRenderer_Create(SDL_Renderer* renderer);
+
+SDL_Texture* LcdRenderer_GetTexture(LcdRenderer* renderer);
+void LcdRenderer_Render(LcdRenderer* lcdRenderer, uint32_t* displayData);
+
+void LcdRenderer_Destroy(LcdRenderer* renderer);
 
 #ifdef __cplusplus
 }
