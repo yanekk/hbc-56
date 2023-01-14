@@ -99,7 +99,7 @@ void test_writeDevice_turnOffSegmentB(void)
     TEST_ASSERT((readTestDevice(LCD_SEGMENT_B_CMD) & CMD_STATUS_ON_OFF) == 0);
 }
 
-void test_writeDevice_dataCanBeWrittenAndRead(void)
+void test_writeDevice_dataCanBeWrittenAndRead()
 {
     // arrange
     initTestDevice();
@@ -116,6 +116,20 @@ void test_writeDevice_dataCanBeWrittenAndRead(void)
     }
 }
 
+void test_setAddress_addressCanBeSet() {
+    // arrange
+    initTestDevice();
+    writeTestDevice(LCD_SEGMENT_A_CMD, CMD_DISPLAY_ON);
+
+    // act
+    writeTestDevice(LCD_SEGMENT_A_CMD, LCD_CMD_SET_ADDRESS_MASK | 63);
+    writeTestDevice(LCD_SEGMENT_A_DATA, 0xFA);
+    writeTestDevice(LCD_SEGMENT_A_CMD, LCD_CMD_SET_ADDRESS_MASK | 63);
+
+    // assert
+    TEST_ASSERT(readTestDevice(LCD_SEGMENT_A_DATA) == 0xFA);
+}
+
 TEST_LIST = {
    { "test_createDevice_nameIsSet", test_createDevice_nameIsSet },
    { "test_writeDevice_turnOnSegmentA", test_writeDevice_turnOnSegmentA },
@@ -123,5 +137,6 @@ TEST_LIST = {
    { "test_writeDevice_turnOffSegmentA", test_writeDevice_turnOffSegmentA },
    { "test_writeDevice_turnOffSegmentB", test_writeDevice_turnOffSegmentB },
    { "test_writeDevice_dataCanBeWrittenAndRead", test_writeDevice_dataCanBeWrittenAndRead },
+   { "test_setAddress_addressCanBeSet", test_setAddress_addressCanBeSet },
    { NULL, NULL }     /* zeroed record marking the end of the list */
 };
