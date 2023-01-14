@@ -2,7 +2,9 @@
 
 #include "devices/device.h"
 #include "devices/lcd/segment.h"
+#include "devices/lcd/renderer.h"
 #include "devices/dual_lcd_device.h"
+#include "utils/matrix.h"
 
 typedef struct {
     LcdSegment* segmentA;
@@ -15,7 +17,7 @@ typedef struct {
 
 // static void resetDualLcdDevice(HBC56Device*);
 static void destroyDualLcdDevice(HBC56Device*);
-// static void renderDualLcdDevice(HBC56Device* device);
+static void renderDualLcdDevice(HBC56Device* device);
 static uint8_t readDualLcdDevice(HBC56Device*, uint16_t, uint8_t*, uint8_t);
 static uint8_t writeDualLcdDevice(HBC56Device*, uint16_t, uint8_t);
 
@@ -35,7 +37,7 @@ HBC56Device createDualLcdDevice(uint16_t segmentAAddress, uint16_t segmentBAddre
     // device.resetFn = &resetDualLcdDevice;
     device.readFn = &readDualLcdDevice;
     device.writeFn = &writeDualLcdDevice;
-    //device.renderFn = &renderDualLcdDevice;
+    device.renderFn = &renderDualLcdDevice;
 
     return device;
 }
@@ -82,6 +84,9 @@ static uint8_t sendCommand(LcdSegment* segment, uint8_t command) {
     case LCD_CMD_SET_PAGE_MASK:
         LcdSegment_SetPage(segment, command & LCD_CMD_SET_PAGE_VALUE_MASK);
         break;
+    case LCD_CMD_SET_START_LINE_MASK:
+        LcdSegment_SetStartLine(segment, command & LCD_CMD_SET_START_LINE_VALUE_MASK);
+        break;
     }
     return 1;
 }
@@ -106,4 +111,29 @@ static void destroyDualLcdDevice(HBC56Device* device) {
         free(lcdDevice);
     }
     free(device);
+}
+
+static void renderDualLcdDevice(HBC56Device* device) {
+    DualLcdDevice* lcdDevice = getDualLcdDevice(device);
+    
+    uint8_t segmentABuffer[LCD_SEGMENT_SIZE];
+    Matrix segmentAMatrix = {
+        .data = segmentABuffer,
+        .height = LCD_SEGMENT_ROWS,
+        .width = LCD_SEGMENT_COLUMNS
+    };
+    LcdSegment_CopyVram(lcdDevice->segmentA, segmentABuffer);
+
+    uint8_t segmentBBuffer[LCD_SEGMENT_SIZE];
+    Matrix segmentBMatrix = {
+        .data = segmentBBuffer,
+        .height = LCD_SEGMENT_ROWS,
+        .width = LCD_SEGMENT_COLUMNS
+    };
+    LcdSegment_CopyVram(lcdDevice->segmentB, segmentBBuffer);
+
+    uint32_t displayData[LCD_DATA_SIZE];
+    Matrix_MergeToBitArray(&segmentAMatrix, &segmentBMatrix, displayData);
+
+    LcdRenderer_Render(displayData);
 }

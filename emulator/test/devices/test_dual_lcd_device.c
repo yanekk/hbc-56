@@ -2,6 +2,7 @@
 #include "devices/dual_lcd_device.h"
 #include "devices/device.h"
 #include "devices/lcd/segment.h"
+#include "utils/matrix.h"
 
 #define LCD_SEGMENT_A 0x4200
 #define LCD_SEGMENT_B 0x4400
@@ -20,6 +21,11 @@
 
 #define CMD_STATUS_BUSY_MASK 0b10000000 
 #define CMD_STATUS_ON_OFF    0b00100000
+
+uint32_t renderedData[LCD_DATA_SIZE];
+void LcdRenderer_Render(uint32_t* displayData) {
+    memcpy(renderedData, displayData, sizeof(uint32_t) * LCD_DATA_SIZE);
+}
 
 void test_createDevice_nameIsSet(void)
 {
@@ -150,6 +156,29 @@ void test_setAddress_pageCanBeSet() {
     TEST_ASSERT(readTestDevice(LCD_SEGMENT_A_DATA) == 0xFA);
 }
 
+void test_setAddress_startLineCanBeSet() {
+    // arrange
+    initTestDevice();
+    writeTestDevice(LCD_SEGMENT_A_CMD, CMD_DISPLAY_ON);
+    writeTestDevice(LCD_SEGMENT_A_DATA, 0b11111111);
+    writeTestDevice(LCD_SEGMENT_A_CMD, LCD_CMD_SET_START_LINE_MASK | 4);
+    // act
+    
+    // assert
+    renderDevice(&lcdDevice);
+
+    uint8_t LINE_WIDTH = LCD_SEGMENT_COLUMNS * 2;
+
+    TEST_ASSERT(renderedData[0] == 0);
+    TEST_ASSERT(renderedData[LINE_WIDTH] == 0);
+    TEST_ASSERT(renderedData[LINE_WIDTH*2] == 0);
+    TEST_ASSERT(renderedData[LINE_WIDTH*3] == 0);
+    TEST_ASSERT(renderedData[LINE_WIDTH*4] == 1);
+    TEST_ASSERT(renderedData[LINE_WIDTH*5] == 1);
+    TEST_ASSERT(renderedData[LINE_WIDTH*6] == 1);
+    TEST_ASSERT(renderedData[LINE_WIDTH*7] == 1);
+}
+
 TEST_LIST = {
    { "test_createDevice_nameIsSet", test_createDevice_nameIsSet },
    { "test_writeDevice_turnOnSegmentA", test_writeDevice_turnOnSegmentA },
@@ -159,5 +188,6 @@ TEST_LIST = {
    { "test_writeDevice_dataCanBeWrittenAndRead", test_writeDevice_dataCanBeWrittenAndRead },
    { "test_setAddress_addressCanBeSet", test_setAddress_addressCanBeSet },
    { "test_setAddress_pageCanBeSet", test_setAddress_pageCanBeSet },
+   { "test_setAddress_startLineCanBeSet", test_setAddress_startLineCanBeSet },
    { NULL, NULL }     /* zeroed record marking the end of the list */
 };
