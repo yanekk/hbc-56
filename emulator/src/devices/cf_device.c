@@ -94,7 +94,7 @@ static uint8_t readCompactFlashDevice(HBC56Device* device, uint16_t addr, uint8_
     *val |= CF_Read_Status_DriveWriteFault(cfDevice->compactFlash) << 5;
     *val |= CF_Read_Status_Ready(cfDevice->compactFlash) << 6;
     *val |= CF_Read_Status_Busy(cfDevice->compactFlash) << 7;
-    break;
+    return 1;
 
     case CF_ERR:
     *val |= CF_Read_Error_BadBlock(cfDevice->compactFlash) << 7;
@@ -102,14 +102,14 @@ static uint8_t readCompactFlashDevice(HBC56Device* device, uint16_t addr, uint8_
     *val |= CF_Read_Error_InvalidSector(cfDevice->compactFlash) << 4;
     *val |= CF_Read_Error_InvalidCommand(cfDevice->compactFlash) << 2;
     *val |= CF_Read_Error_GeneralError(cfDevice->compactFlash) << 0;
-    break;
+    return 1;
 
     case CF_DATA:
     *val = CF_Read_Data(cfDevice->compactFlash, dbg);
-    break;
+    return 1;
   }
 
-  return 1;
+  return 0;
 }
 
 static uint8_t writeCompactFlashDevice(HBC56Device* device, uint16_t addr, uint8_t val)
@@ -120,40 +120,40 @@ static uint8_t writeCompactFlashDevice(HBC56Device* device, uint16_t addr, uint8
     switch(offset) {
       case CF_SECCO:
       CF_Write_SectorCount(cfDevice->compactFlash, val);
-      break;
+      return 1;
 
       case CF_LBA0:
       CF_Write_SectorNumber(cfDevice->compactFlash,
         (CF_Read_SectorNumber(cfDevice->compactFlash) & 0xFFFFFF00) | val
       );
-      break;
+      return 1;
 
       case CF_LBA1:
       CF_Write_SectorNumber(cfDevice->compactFlash,
         (CF_Read_SectorNumber(cfDevice->compactFlash) & 0xFFFF00FF) | (val << 8)
       );
-      break;
+      return 1;
 
       case CF_LBA2:
       CF_Write_SectorNumber(cfDevice->compactFlash,
         (CF_Read_SectorNumber(cfDevice->compactFlash) & 0xFF00FFFF) | (val << 16)
       );
-      break;
+      return 1;
 
       case CF_LBA3:
       CF_Write_SectorNumber(cfDevice->compactFlash,
         (CF_Read_SectorNumber(cfDevice->compactFlash) & 0x00FFFFFF) | ((val << 24) & 0x1F000000)
       );
-      break;
+      return 1;
 
       case CF_CMD:
       switch(val) {
         case CF_Command_ReadSectors:
         CF_Write_Command_ReadSectors(cfDevice->compactFlash);
-        break;
+        return 1;
       }
-      break;
+      return 0;
 
     }
-    return 1;
+    return 0;
 }

@@ -68,7 +68,7 @@ static uint8_t readDualLcdDevice(HBC56Device* device, uint16_t address, uint8_t*
         *data = LcdSegment_ReadData(segment, isDebug);
         return 1;
     }
-    return 1;
+    return 0;
 }
 
 static uint8_t sendCommand(LcdSegment* segment, uint8_t command) {
@@ -80,19 +80,19 @@ static uint8_t sendCommand(LcdSegment* segment, uint8_t command) {
         } else {
             LcdSegment_TurnOff(segment);
         }
-        break;
+        return 1;
     
     case LCD_CMD_SET_ADDRESS_MASK:
         LcdSegment_SetAddress(segment, command & LCD_CMD_SET_ADDRESS_VALUE_MASK);
-        break;
+        return 1;
     case LCD_CMD_SET_PAGE_MASK:
         LcdSegment_SetPage(segment, command & LCD_CMD_SET_PAGE_VALUE_MASK);
-        break;
+        return 1;
     case LCD_CMD_SET_START_LINE_MASK:
         LcdSegment_SetStartLine(segment, command & LCD_CMD_SET_START_LINE_VALUE_MASK);
-        break;
+        return 1;
     }
-    return 1;
+    return 0;
 }
 
 static uint8_t writeDualLcdDevice(HBC56Device* device, uint16_t address, uint8_t data) {
@@ -105,16 +105,18 @@ static uint8_t writeDualLcdDevice(HBC56Device* device, uint16_t address, uint8_t
         return 1;
     }
 
-    return 1;
+    return 0;
 }
 
 static void destroyDualLcdDevice(HBC56Device* device) {
     DualLcdDevice* lcdDevice = getDualLcdDevice(device);
     if(lcdDevice != NULL) {
         LcdSegment_Destroy(lcdDevice->segmentA);
+        LcdSegment_Destroy(lcdDevice->segmentB);
+        
         free(lcdDevice);
+        device->data = NULL;
     }
-    free(device);
 }
 
 static void renderDualLcdDevice(HBC56Device* device) {
@@ -138,6 +140,8 @@ static void renderDualLcdDevice(HBC56Device* device) {
 
     LcdRendererImageData displayData;
     Matrix_MergeToBitArray(&segmentAMatrix, &segmentBMatrix, displayData.data);
-
-    LcdRenderer_Render(lcdDevice->renderer, &displayData);
+    if(lcdDevice->renderer != NULL) {
+        LcdRenderer_Render(lcdDevice->renderer, &displayData);
+        device->output = LcdRenderer_GetTexture(lcdDevice->renderer);
+    }
 }

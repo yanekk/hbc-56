@@ -35,6 +35,8 @@
 #include "devices/ay38910_device.h"
 #include "devices/uart_device.h"
 #include "devices/cf_device.h"
+#include "devices/dual_lcd_device.h"
+#include "devices/lcd/renderer.h"
 #include "parseargs.h"
 #include "file.h"
 
@@ -412,7 +414,7 @@ void hbc56MemWrite(uint16_t addr, uint8_t val)
 {
   for (size_t i = 0; i < deviceCount; ++i)
   {
-    if (writeDevice(&devices[i], addr, val))
+    if (writeDevice(&devices[i], addr, val)) 
       break;
   }
 }
@@ -1075,6 +1077,9 @@ int main(int argc, char* argv[])
     hbc56AddDevice(createCompactFlashDevice(HBC56_CF_ADDRESS, cfCardImageFile));
     File_Free(cfCardImageFile);
   }
+
+  LcdRenderer* lcdRenderer = LcdRenderer_Create(renderer);
+  hbc56AddDevice(createDualLcdDevice(lcdRenderer, HBC56_DUAL_LCD_SEGMENT_A, HBC56_DUAL_LCD_SEGMENT_B));
   
   done = 0;
 
@@ -1105,12 +1110,14 @@ int main(int argc, char* argv[])
 
   hbc56Audio(0);
 
+
   SDL_AudioQuit();
 
   ImGui_ImplSDLRenderer_Shutdown();
   ImGui_ImplSDL2_Shutdown();
   ImGui::DestroyContext();
 
+  LcdRenderer_Destroy(lcdRenderer);
   SDL_DestroyRenderer(renderer);
   SDL_DestroyWindow(window);
   SDL_Quit();
