@@ -53,12 +53,19 @@ static DualLcdDevice* getDualLcdDevice(HBC56Device* device) {
 }
 
 static LcdSegment* getSegment(DualLcdDevice* lcdDevice, uint16_t address) {
-    return (address & 0xFF00) == lcdDevice->segmentAAddress ? lcdDevice->segmentA : lcdDevice->segmentB;
+    if ((address & 0xFF00) == lcdDevice->segmentAAddress)
+        return lcdDevice->segmentA;
+
+    if ((address & 0xFF00) == lcdDevice->segmentBAddress)
+        return lcdDevice->segmentB;
+    return NULL;
 }
 
 static uint8_t readDualLcdDevice(HBC56Device* device, uint16_t address, uint8_t* data, uint8_t isDebug) {
     LcdSegment* segment = getSegment(getDualLcdDevice(device), address);
-
+    if(segment == NULL)
+        return 0;
+        
     if((address & 0x00FF) == 0) { // cmd
         *data = LcdSegment_State(segment) << 5;
         return 1;
@@ -97,6 +104,9 @@ static uint8_t sendCommand(LcdSegment* segment, uint8_t command) {
 
 static uint8_t writeDualLcdDevice(HBC56Device* device, uint16_t address, uint8_t data) {
     LcdSegment* segment = getSegment(getDualLcdDevice(device), address);
+    if(segment == NULL)
+        return 0;
+
     if((address & 0x00FF) == 0)  // cmd
         return sendCommand(segment, data);
 

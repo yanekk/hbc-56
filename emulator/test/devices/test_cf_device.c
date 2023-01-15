@@ -34,14 +34,13 @@ typedef struct CompactFlashSpy {
 } CompactFlashSpy;
 
 CompactFlashSpy compactFlashSpy = {};
-CompactFlash testCfCard = {};
 
 HBC56Device testDevice;
 
 CompactFlash* CF_Create(const uint8_t *data) {
     compactFlashSpy.isCreated = true;
     compactFlashSpy.data = (uint8_t*)data;
-    return &testCfCard;
+    return 1;
 }
 
 bool CF_Read_Status_Busy(CompactFlash *device) {
@@ -195,6 +194,56 @@ void test_destroyDevice_cfCardIsDestroyed(void)
 
     // assert 
     TEST_ASSERT(compactFlashSpy.isDestroyed == true);
+}
+
+void test_readDevice_returnsZeroOnAddressOutsideOfScope(void)
+{
+    // arrange
+    testInit(); 
+    
+    // act
+    uint8_t value = 0;
+    uint8_t isHandled = readDevice(&testDevice, 0x2007, &value, true);
+
+    // assert
+    TEST_ASSERT(isHandled == 0);
+}
+
+void test_readDevice_returnsOneOnAddressInsideScope(void)
+{
+    // arrange
+    testInit(); 
+    
+    // act
+    uint8_t value = 0;
+    uint8_t isHandled = readDevice(&testDevice, BASE_ADDRESS + 7, &value, true);
+
+    // assert
+    TEST_ASSERT(isHandled == 1);
+}
+
+void test_writeDevice_returnsZeroOnAddressOutsideOfScope(void)
+{
+    // arrange
+    testInit(); 
+    
+    // act
+    uint8_t isHandled = writeDevice(&testDevice, 0x2007, 0);
+
+    // assert
+    TEST_ASSERT(isHandled == 0);
+}
+
+void test_writeDevice_returnsOneOnAddressInsideScope(void)
+{
+    // arrange
+    testInit(); 
+    
+    // act
+    uint8_t isHandled = writeDevice(&testDevice, BASE_ADDRESS + 2, 0);
+
+    // assert
+    TEST_ASSERT(isHandled == 1);
 }
 
 void test_readDevice_CF_STAT_zeroByDefault(void)
@@ -476,7 +525,10 @@ TEST_LIST = {
    { "test_createDevice_nameIsSet", test_createDevice_nameIsSet },
    { "test_createDevice_cfCardIsCreated", test_createDevice_cfCardIsCreated },
    { "test_createDevice_dataIsCopiedToCfCard", test_createDevice_dataIsCopiedToCfCard },
-   { "test_destroyDevice_cfCardIsDestroyed", test_destroyDevice_cfCardIsDestroyed },
+   { "test_readDevice_returnsZeroOnAddressOutsideOfScope", test_readDevice_returnsZeroOnAddressOutsideOfScope },
+   { "test_readDevice_returnsOneOnAddressInsideScope", test_readDevice_returnsOneOnAddressInsideScope },
+   { "test_writeDevice_returnsZeroOnAddressOutsideOfScope", test_writeDevice_returnsZeroOnAddressOutsideOfScope },
+   { "test_writeDevice_returnsOneOnAddressInsideScope", test_writeDevice_returnsOneOnAddressInsideScope },
    { "test_readDevice_CF_STAT_zeroByDefault", test_readDevice_CF_STAT_zeroByDefault },
    { "test_readDevice_CF_STAT_statusErrorSetBit0", test_readDevice_CF_STAT_statusErrorSetBit0 },
    { "test_readDevice_CF_STAT_statusCorrectableDataErrorSetBit2", test_readDevice_CF_STAT_statusCorrectableDataErrorSetBit2 },

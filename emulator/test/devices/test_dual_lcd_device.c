@@ -4,6 +4,7 @@
 #include "devices/lcd/segment.h"
 #include "devices/lcd/renderer.h"
 #include "utils/matrix.h"
+#include "SDL.h"
 
 #define LCD_SEGMENT_A 0x4200
 #define LCD_SEGMENT_B 0x4400
@@ -28,6 +29,10 @@ void LcdRenderer_Render(LcdRenderer* renderer, LcdRendererImageData* imageData) 
     memcpy(renderedData.data, imageData->data, sizeof(imageData->data));
 }
 
+SDL_Texture* LcdRenderer_GetTexture(LcdRenderer* renderer) {
+    return NULL;
+}
+
 void test_createDevice_nameIsSet(void)
 {
     const HBC56Device testDevice = createDualLcdDevice(NULL, LCD_SEGMENT_A, LCD_SEGMENT_B);
@@ -37,7 +42,7 @@ void test_createDevice_nameIsSet(void)
 HBC56Device lcdDevice;
 
 void initTestDevice() {
-    lcdDevice = createDualLcdDevice(NULL, LCD_SEGMENT_A, LCD_SEGMENT_B);
+    lcdDevice = createDualLcdDevice((LcdRenderer*)1, LCD_SEGMENT_A, LCD_SEGMENT_B);
 }
 
 void writeTestDevice(uint16_t address, uint8_t data) {
@@ -163,13 +168,13 @@ void test_setAddress_startLineCanBeSet() {
     writeTestDevice(LCD_SEGMENT_A_CMD, CMD_DISPLAY_ON);
     writeTestDevice(LCD_SEGMENT_A_DATA, 0b11111111);
     writeTestDevice(LCD_SEGMENT_A_CMD, LCD_CMD_SET_START_LINE_MASK | 4);
+
     // act
+    renderDevice(&lcdDevice);
     
     // assert
-    renderDevice(&lcdDevice);
-
     uint8_t LINE_WIDTH = LCD_SEGMENT_COLUMNS * 2;
-    
+
     TEST_ASSERT(renderedData.data[0] == 0);
     TEST_ASSERT(renderedData.data[LINE_WIDTH] == 0);
     TEST_ASSERT(renderedData.data[LINE_WIDTH*2] == 0);
@@ -178,6 +183,56 @@ void test_setAddress_startLineCanBeSet() {
     TEST_ASSERT(renderedData.data[LINE_WIDTH*5] == 1);
     TEST_ASSERT(renderedData.data[LINE_WIDTH*6] == 1);
     TEST_ASSERT(renderedData.data[LINE_WIDTH*7] == 1);
+}
+
+void test_writeDevice_notHandledIfNotInsideAddressScope(void)
+{
+    // arrange
+    initTestDevice();
+
+    // act
+    uint8_t isHandled = writeDevice(&lcdDevice, 0x2000, 0);
+
+    // assert
+    TEST_ASSERT(isHandled == 0);
+}
+
+void test_writeDevice_handledIfNotInsideAddressScope(void)
+{
+    // arrange
+    initTestDevice();
+
+    // act
+    uint8_t isHandled = writeDevice(&lcdDevice, LCD_SEGMENT_A_DATA, 0);
+
+    // assert
+    TEST_ASSERT(isHandled == 1);
+}
+
+void test_readDevice_notHandledIfNotInsideAddressScope(void)
+{
+    // arrange
+    initTestDevice();
+
+    // act
+    uint8_t val;
+    uint8_t isHandled = readDevice(&lcdDevice, 0x2000, &val, true);
+
+    // assert
+    TEST_ASSERT(isHandled == 0);
+}
+
+void test_readDevice_handledIfNotInsideAddressScope(void)
+{
+    // arrange
+    initTestDevice();
+
+    // act
+    uint8_t val;
+    uint8_t isHandled = readDevice(&lcdDevice, LCD_SEGMENT_A_DATA, &val, true);
+
+    // assert
+    TEST_ASSERT(isHandled == 1);
 }
 
 TEST_LIST = {
@@ -190,5 +245,9 @@ TEST_LIST = {
    { "test_setAddress_addressCanBeSet", test_setAddress_addressCanBeSet },
    { "test_setAddress_pageCanBeSet", test_setAddress_pageCanBeSet },
    { "test_setAddress_startLineCanBeSet", test_setAddress_startLineCanBeSet },
+   { "test_writeDevice_notHandledIfNotInsideAddressScope", test_writeDevice_notHandledIfNotInsideAddressScope },
+   { "test_writeDevice_handledIfNotInsideAddressScope", test_writeDevice_handledIfNotInsideAddressScope },
+   { "test_readDevice_notHandledIfNotInsideAddressScope", test_readDevice_notHandledIfNotInsideAddressScope },
+   { "test_readDevice_handledIfNotInsideAddressScope", test_readDevice_handledIfNotInsideAddressScope },
    { NULL, NULL }     /* zeroed record marking the end of the list */
 };
