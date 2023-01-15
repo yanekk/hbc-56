@@ -84,8 +84,9 @@ ifdef FILE
 INCLUDES_TEST = $(INCLUDES) -Ithirdparty/acutest/include
 
 TEST_SOURCE_FILE = $(subst \,/,$(FILE))
+$(info $(TEST_SOURCE_FILE))
 TEST_INCLUDES_FILE = $(addsuffix .inc, $(basename $(TEST_SOURCE_FILE)))
-TEST_OBJECT_FILE = $(addprefix obj\, $(addsuffix .o, $(basename $(TEST_SOURCE_FILE))))
+TEST_OBJECT_FILE = $(addprefix obj/, $(addsuffix .o, $(basename $(TEST_SOURCE_FILE))))
 
 TEST_INCLUDES_SOURCES = $(file < $(TEST_INCLUDES_FILE))
 TEST_INCLUDES_OBJECTS := $(TEST_INCLUDES_SOURCES:%.c=$(OBJ_DIR)/%.o)
@@ -95,14 +96,20 @@ C_OBJECTS = $(TEST_OBJECT_FILE) $(TEST_INCLUDES_OBJECTS)
 $(C_OBJECTS) : obj/%.o : %.c
 	mkdir -p $(dir $@)
 	$(info Compiling $<)
-	$(GCC) -g $(MODULE_CFLAGS) $(CFLAGS_W) $(INCLUDES) -I$(INCLUDE_PATH) -c $(subst \,/,$<) -o $@
+	$(GCC) -g $(MODULE_CFLAGS) $(CFLAGS_W) $(INCLUDES_TEST) -I$(INCLUDE_PATH) -c $(subst \,/,$<) -o $@
 
-test: $(TEST_OBJECT_FILE) $(TEST_INCLUDES_OBJECTS)
+test: $(C_OBJECTS)
+	$(info Building executable $<)
 	mkdir -p $(dir $(TEST_OBJECT_FILE))
 	mkdir -p $(BIN_DIR)
-	$(GCC) -g $(MODULE_CFLAGS) $(CFLAGS_W) $(INCLUDES_TEST) -I$(INCLUDE_PATH) -c $(TEST_SOURCE_FILE) -o $(TEST_OBJECT_FILE)
 	$(GPP) -g $(CFLAGS_W) $(TEST_OBJECT_FILE) $(TEST_INCLUDES_OBJECTS) -o $(BIN_DIR)/run_tests -lmingw32 -lsdl2main -lsdl2
 	$(BIN_DIR)/run_tests.exe
+else
+SOURCES := $(shell /usr/bin/find test -name 'test_*.c')
+tests: $(SOURCES)
+	for file in $^ ; do \
+		make -s test FILE=$${file} ; \
+	done
 endif
 
 run:
