@@ -36,9 +36,12 @@ void Debugger_LoadLabels(const char* labelFileContents, char* labelMap[MEMORY_SI
     if(labelFileContents == NULL)
         return;
 
+    char* p = (char*)labelFileContents;
     char lineBuffer[1024];
 
-    char *p = (char*)labelFileContents;
+    for(char c = *p; c != 0; p++) {
+        printf("%c", c);
+    }
 
     for (;;)
     {
