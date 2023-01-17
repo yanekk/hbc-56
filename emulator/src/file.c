@@ -16,7 +16,7 @@ File* File_Read(const char* filePath) {
     fseek(filePtr, 0, SEEK_END);
     file->size = ftell(filePtr);
 
-    file->data = malloc(sizeof(uint8_t) * file->size + 1);
+    file->data = calloc(sizeof(uint8_t), file->size + 1);
     rewind(filePtr);
     fread(file->data, sizeof(uint8_t), file->size, filePtr);
     fclose(filePtr);

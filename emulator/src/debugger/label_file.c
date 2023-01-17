@@ -3,6 +3,8 @@
 #include <stdbool.h>
 #include <ctype.h>
 #include <string.h>
+#include <stdio.h>
+
 #include "SDL.h"
 
 #define MEMORY_SIZE 0x10000
@@ -12,6 +14,8 @@ static int isProbablyConstant(const char* str)
     char tmpBuffer[256] = {0};
     SDL_strlcpy(tmpBuffer, str, sizeof(tmpBuffer) - 1);
     SDL_strupr(tmpBuffer);
+    
+
     return SDL_strcmp(str, tmpBuffer) == 0;
 }
 
@@ -25,10 +29,10 @@ static void clearLabelMap(char** labelMap) {
   }
 }
 
-void Debugger_LoadLabels(const char* labelFileContents, char** labelMap)
+void Debugger_LoadLabels(const char* labelFileContents, char* labelMap[MEMORY_SIZE])
 {
     clearLabelMap(labelMap);
-    
+
     if(labelFileContents == NULL)
         return;
 
@@ -39,8 +43,10 @@ void Debugger_LoadLabels(const char* labelFileContents, char** labelMap)
     for (;;)
     {
       char* end = SDL_strchr(p, '\n');
-      if (end == NULL)
+      if (end == NULL) {
         break;
+      }
+        
 
       SDL_strlcpy(lineBuffer, p, end - p);
       p = end + 1;
@@ -94,13 +100,12 @@ void Debugger_LoadLabels(const char* labelFileContents, char** labelMap)
       SDL_strlcpy(valueStr, lineBuffer + valueStart, valueEnd - valueStart + 1);
 
       unsigned int value = 0;
-      // TODO: use standard library
-      SDL_sscanf(valueStr, "%x", &value);
+
+      sscanf(valueStr, "%x", &value);
 
       uint16_t addr = (uint16_t)value;
 
-      // TODO: use standard library
-      bool isUnused = SDL_strstr(lineBuffer, "; unused") != NULL;
+      bool isUnused = strstr(lineBuffer, "; unused") != NULL;
 
       //TODO: constants[std::string(lineBuffer + labelStart, labelEnd - labelStart)] = addr;
 

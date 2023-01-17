@@ -1,0 +1,2 @@
+LABEL_ONE = $1234
+label_two = $1234 ; unused

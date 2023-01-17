@@ -1,4 +1,4 @@
-label_1 0000
-label_2 0010
-label_3 0100
-label_4 1000
+label_1 = $0
+label_2 = $10
+label_3 = $100
+label_4 = $1000

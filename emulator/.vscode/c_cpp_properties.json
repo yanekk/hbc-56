@@ -10,6 +10,7 @@
                 ".\\thirdparty\\acutest\\include",
                 ".\\thirdparty\\sdl\\include",
                 ".\\modules\\65c02\\src",
+                ".\\modules\\tms9918\\src",
                 "src"
             ],
             "windowsSdkVersion": "10.0.19041.0",
