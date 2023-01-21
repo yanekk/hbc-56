@@ -18,7 +18,7 @@ void test_parsesLabelFileToArray(void)
     File* file = File_Read(DATA_PATH "simple_label_file.lmap");
 
     // act
-    Debugger_LoadLabels(file->data, labelMap);
+    Debugger_LoadLabels((char*)file->data, labelMap);
 
     // assert
     TEST_CHECK_LABEL_EQUALS(0x0, "label_1");
@@ -55,7 +55,7 @@ void test_nonConstantLabelsDoesntOverrideAddresses(void)
     File* file = File_Read(DATA_PATH "label_file_with_no_constant_override.lmap");
 
     // act
-    Debugger_LoadLabels(file->data, labelMap);
+    Debugger_LoadLabels((char*)file->data, labelMap);
 
     // assert
     TEST_CHECK_LABEL_EQUALS(0x1234, "label_one");
@@ -70,7 +70,7 @@ void test_unusedConstantLabelsDoesntOverrideAddresses(void)
     File* file = File_Read(DATA_PATH "label_file_with_unused_constant_override.lmap");
 
     // act
-    Debugger_LoadLabels(file->data, labelMap);
+    Debugger_LoadLabels((char*)file->data, labelMap);
 
     // assert
     TEST_CHECK_LABEL_EQUALS(0x1234, "LABEL_ONE");
@@ -85,7 +85,7 @@ void test_usedConstantLabelsOverrideAddresses(void)
     File* file = File_Read(DATA_PATH "label_file_with_constant_override.lmap");
 
     // act
-    Debugger_LoadLabels(file->data, labelMap);
+    Debugger_LoadLabels((char*)file->data, labelMap);
 
     // assert
     TEST_CHECK_LABEL_EQUALS(0x1234, "label_two");

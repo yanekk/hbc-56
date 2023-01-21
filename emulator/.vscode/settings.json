@@ -20,7 +20,8 @@
         "functional": "c",
         "cstring": "c",
         "random": "c",
-        "sstream": "c"
+        "sstream": "c",
+        "queue": "c"
     },
     "C_Cpp.default.defines": [
         "VR_6502_EMU_STATIC=1"
