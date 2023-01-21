@@ -8,8 +8,7 @@
 
 #include "SDL.h"
 #include "utils/list.h"
-
-#define MEMORY_SIZE 0x10000
+#include "label_file.h"
 
 static int isProbablyConstant(const char* str)
 {
@@ -19,7 +18,7 @@ static int isProbablyConstant(const char* str)
     return SDL_strcmp(str, tmpBuffer) == 0;
 }
 
-static void clearLabelMap(char** labelMap) {
+static void clearLabelMap(char* labelMap[MEMORY_SIZE]) {
   for (int i = 0; i < MEMORY_SIZE; ++i)
   {
     if(labelMap[i] == NULL)
@@ -72,6 +71,7 @@ void Debugger_LoadLabels(const char* labelFileContents, char* labelMap[MEMORY_SI
         break;
       case '\n':
         if (strlen(addressToken) && strlen(labelToken)) {
+          
           uint32_t address = 0;
           sscanf(addressToken, "$%x", &address);
 
