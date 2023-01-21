@@ -37,7 +37,7 @@ uint16_t debugTmsMemoryAddr = 0;
 
 static VrEmu6502 *cpu6502 = NULL;
 
-static const char *labelMap[MEMORY_SIZE] = {NULL};
+static char *labelMap[MEMORY_SIZE] = {NULL};
 static HBC56Device* tms9918 = NULL;
 
 static char tmpBuffer[256] = {0};
