@@ -19,6 +19,11 @@
 #include "imgui.h"
 #include "label_file.h"
 
+#include "parser/Token.hpp"
+#include "parser/SourceLine.hpp"
+#include "parser/Source.hpp"
+#include "parser/VrEmu6502Dissassembler.hpp"
+
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
@@ -40,22 +45,15 @@ static VrEmu6502 *cpu6502 = NULL;
 static char *labelMap[MEMORY_SIZE] = {NULL};
 static HBC56Device* tms9918 = NULL;
 
-static char tmpBuffer[256] = {0};
-
 static std::map<std::string, int> constants;
-
 static uint16_t highlightAddr = 0;
 static uint16_t hoveredAddr = 0;
-
-static std::set<char> operators = {'!','^','-','/','%','+','<','>','=','&','|','(',')'};
 
 void debuggerLoadLabels(const char* labelFileContents)
 {
   Debugger_LoadLabels(labelFileContents, labelMap);
 }
 
-//std::map<std::string, std::vector<std::pair<std::string, uint16_t> > > source;
-//std::map<int, std::pair<std::string, int> > addrMap;
 std::set<std::string> opcodes;
 
 bool isBranchingOpcode(const std::string& opcode)
@@ -71,408 +69,9 @@ bool isBranchingOpcode(const std::string& opcode)
   return opcode == "jmp" || opcode == "jsr" || opcode == "rts" || opcode == "rti";
 }
 
+VrEmu6502Dissassembler dissassembler = VrEmu6502Dissassembler(cpu6502, labelMap);
 
-class Token
-{
-public:
-  typedef std::shared_ptr<Token> Ptr;
-
-  typedef enum
-  {
-    WHITESPACE,
-    COMMENT,
-    OPCODE,
-    COMMA,
-    NUMBER,
-    STRING,
-    OPERATOR,
-    IMMEDIATE,
-    MACRO,
-    CONSTANT,
-    LABEL,
-    PSEUDOOP,
-    UNKNOWN
-  } Type;
-
-  static Ptr Create(Token::Type type, const std::string& value)
-  {
-    return Ptr(new Token(type, value));
-  }
-
-  Token::Type type() const { return m_type; }
-  const std::string& value() const { return m_value; }
-
-private:
-  Token(Token::Type type, const std::string& value)
-    : m_type(type), m_value(value)
-  {
-
-  }
-
-  Token::Type             m_type;
-  std::string             m_value;
-};
-
-class SourceFile;
-
-class SourceLine
-{
-public:
-  SourceLine(SourceFile *file, const std::string& line, uint16_t addr = 0xffff) : m_file(file), m_addr(addr)
-  {
-    for (int i = 0; i < line.size(); ++i)
-    {
-      if (line[i] == ';')
-      {
-        addChild(Token::Create(Token::COMMENT, line.substr(i)));
-        return;
-      }
-      else if (line[i] == '\'')
-      {
-        size_t start = i;
-        ++i;
-        for (; i < line.size(); ++i)
-        {
-          if (line[i] == '\'' && line[i - 1] != '\\') break;
-        }
-        addChild(Token::Create(Token::STRING, line.substr(start, i - start)));
-        --i;
-      }
-      else if (line[i] == '"')
-      {
-        size_t start = i;
-        ++i;
-        for (; i < line.size(); ++i)
-        {
-          if (line[i] == '"' && line[i - 1] != '\\') break;
-        }
-        addChild(Token::Create(Token::STRING, line.substr(start, i - start)));
-        --i;
-      }
-      else if (isspace(line[i]))
-      {
-        size_t start = i;
-        for (; i < line.size(); ++i)
-        {
-          if (!isspace(line[i])) break;
-        }
-        addChild(Token::Create(Token::WHITESPACE, line.substr(start, i - start)));
-        --i;
-      }
-      else if (line[i] == ',')
-      {
-        addChild(Token::Create(Token::COMMA, line.substr(i, 1)));
-      }
-      else if (line[i] == '#')
-      {
-        addChild(Token::Create(Token::IMMEDIATE, line.substr(i, 1)));
-      }
-      else if (line[i] == '+' && (containsOnly(Token::WHITESPACE)))
-      {
-        size_t start = i++;
-        for (; i < line.size(); ++i)
-        {
-          if (!isalnum(line[i]) && line[i] != '_' && line[i] <= 127) break;
-        }
-        addChild(Token::Create(i - start == 1 ? Token::CONSTANT : Token::MACRO, line.substr(start, i - start)));
-        --i;
-      }
-      else if (line[i] == '!' && (containsOnly(Token::WHITESPACE)))
-      {
-        size_t start = i++;
-        for (; i < line.size(); ++i)
-        {
-          if (!isalpha(line[i])) break;
-        }
-        addChild(Token::Create(Token::PSEUDOOP, line.substr(start, i - start)));
-        --i;
-      }
-      else if (line[i] == '.' || line[i] == '@' || line[i] == '_' || isalpha(line[i]))
-      {
-        size_t start = i++;
-        for (; i < line.size(); ++i)
-        {
-          if (!isalnum(line[i]) && line[i] != '_' && line[i] <= 127) break;
-        }
-
-        Token::Type type = start == 0 ? Token::LABEL : Token::CONSTANT;
-        std::string word = line.substr(start, i - start);
-
-        if (isalpha(line[start]))
-        {
-          if (opcodes.find(word) != opcodes.end())
-          {
-            type = Token::OPCODE;
-          }
-          else if (word == "DIV")
-          {
-            type = Token::OPERATOR;
-          }
-        }
-
-        addChild(Token::Create(type, word));
-        --i;
-      }
-      else if (line[i] == '$' || (line[i] == '0' && line[i + 1] == 'x')) // hex
-      {
-        size_t start = i++;
-        for (; i < line.size(); ++i)
-        {
-          if (!isxdigit(line[i])) break;
-        }
-        addChild(Token::Create(Token::NUMBER, line.substr(start, i - start)));
-        --i;
-      }
-      else if (line[i] == '%' && (line[i + 1] == '0' || line[i + 1] == '1' || line[i + 1] == '#' || line[i + 1] == '.')) // binary
-      {
-        size_t start = i++;
-        for (; i < line.size(); ++i)
-        {
-          if (line[i] != '0' && line[i] != '1' && line[i] != '.' && line[i] != '#') break;
-        }
-        addChild(Token::Create(Token::NUMBER, line.substr(start, i - start)));
-        --i;
-      }
-      else if (line[i] == '&' && isdigit(line[i + 1])) // octal
-      {
-        size_t start = i++;
-        for (; i < line.size(); ++i)
-        {
-          if (line[i] < '0' || line[i]  > '7') break;
-        }
-        addChild(Token::Create(Token::NUMBER, line.substr(start, i - start)));
-        --i;
-      }
-      else if (isdigit(line[i]))
-      {
-        size_t start = i;
-        for (; i < line.size(); ++i)
-        {
-          if (!isdigit(line[i]) && line[i] != '.') break;
-        }
-        addChild(Token::Create(Token::NUMBER, line.substr(start, i - start)));
-        --i;
-      }
-      else
-      {
-        size_t start = i;
-        if (operators.find(line[i]) != operators.end())
-        {
-          for (; i < line.size(); ++i)
-          {
-            if (operators.find(line[i]) == operators.end()) break;
-          }
-          addChild(Token::Create(Token::OPERATOR, line.substr(start, i - start)));
-          --i;
-        }
-        else
-        {
-          addChild(Token::Create(Token::UNKNOWN, line.substr(i, 1)));
-        }
-      }
-    }
-  }
-
-  void setAddress(uint16_t addr) { m_addr = addr; }
-
-  SourceFile *file() const { return m_file; }
-
-  uint16_t address() const { return m_addr; }
-  const std::vector<Token::Ptr> &children() const { return m_children; }
-
-  std::vector<SourceLine>& macroLines() { return m_macroLines; }
-  const std::vector<SourceLine>& macroLines() const { return m_macroLines; }
-
-  bool contains(Token::Type type) const
-  {
-    for (const auto &node : m_children)
-    {
-      if (node->type() == type)
-        return true;
-    }
-    return false;
-  }
-
-  Token::Ptr childOfType(Token::Type type) const
-  {
-    for (const auto& node : m_children)
-    {
-      if (node->type() == type)
-        return node;
-    }
-    return nullptr;
-  }
-
-
-  bool containsOnly(Token::Type type) const
-  {
-    for (const auto& node : m_children)
-    {
-      if (node->type() != type)
-        return false;
-    }
-    return true;
-  }
-
-private:
-  void addChild(Token::Ptr child) { m_children.push_back(child); }
-
-private:
-  SourceFile             *m_file;
-  uint16_t                m_addr;
-  std::vector<Token::Ptr> m_children;
-  std::vector<SourceLine> m_macroLines;
-
-
-};
-
-
-class SourceFile
-{
-  public:
-    SourceFile(){}
-    SourceFile(const std::string& filename) : m_filename(filename)
-    {
-
-    }
-
-    void addLine(const std::string& line, uint16_t addr)
-    {
-      m_addrMap[addr] = (int)m_lines.size();
-      m_lines.push_back(SourceLine(this, line, addr));
-
-      if (addr != 0xffff)
-      {
-        for (int i = (int)m_lines.size() - 2; i >= 0; --i)
-        {
-          if (m_lines[i].address() == 0xffff)
-          {
-            m_lines[i].setAddress(addr);
-
-            if (m_lines[i].contains(Token::LABEL) && constants.find(m_lines[i].childOfType(Token::LABEL)->value()) == constants.end())
-            {
-              if (!m_lines[i].contains(Token::OPERATOR))
-                constants[m_lines[i].childOfType(Token::LABEL)->value()] = addr;
-            }
-          }
-          else
-          {
-            if (m_lines[i].contains(Token::MACRO))
-            {
-              uint16_t fromAddress = m_lines[i].address();
-              uint16_t toAddress = addr;
-
-              uint16_t tmpAddress = fromAddress;
-              char instructionBuffer[32];
-              while (tmpAddress < toAddress)
-              {
-                uint16_t refAddr = 0;
-                uint16_t prevTmpAddress = tmpAddress;
-                tmpAddress = vrEmu6502DisassembleInstruction(cpu6502, tmpAddress, sizeof(instructionBuffer), instructionBuffer, &refAddr, labelMap);
-                m_lines[i].macroLines().push_back(SourceLine(nullptr, instructionBuffer, prevTmpAddress));
-              }
-            }
-            break;
-          }
-        }
-      }
-    }
-
-    const std::string &filename() const { return m_filename; }
-
-    int numLines() const { return (int)m_lines.size(); }
-    const SourceLine& line(size_t index) const {
-      return m_lines[index];
-    }
-
-    int lineIndex(uint16_t addr) const {
-      auto iter = m_addrMap.lower_bound(addr);
-      if (iter == m_addrMap.end()) return -1;
-      if (iter->first == addr)
-      {
-        return iter->second;
-      }
-      if (iter == m_addrMap.begin()) return -1;
-
-      --iter;
-      if (addr - iter->first < 50)
-        return iter->second;
-      return -1;
-    }
-
-  private:
-    std::string m_filename;
-    std::vector<SourceLine> m_lines;
-    std::map<uint16_t, int> m_addrMap;
-};
-
-
-class Source
-{
-public:
-  SourceFile& file(const std::string& filename)
-  {
-    auto iter = m_files.find(filename);
-    if (iter == m_files.end())
-    {
-      m_files[filename] = SourceFile(filename);
-      return m_files[filename];
-    }
-    return iter->second;
-  }
-
-  const SourceFile& file(uint16_t addr)
-  {
-    if (m_addrMap.empty())
-    {
-      int fileIndex = 0;
-      for (auto iter = m_files.begin(); iter != m_files.end(); ++iter, ++fileIndex)
-      {
-        for (int i = 0; i < iter->second.numLines(); ++i)
-        {
-          m_addrMap[iter->second.line(i).address()] = fileIndex;
-        }
-      }
-    }
-
-    static SourceFile nullFile("");
-
-    auto iter = m_addrMap.lower_bound(addr);
-    if (iter == m_addrMap.end()) return nullFile;
-
-    return fileFromIndex(iter->second);
-  }
-
-  const SourceFile& fileFromIndex(size_t index) const {
-    auto iter = m_files.begin();
-    std::advance(iter, index);
-    return iter->second;
-  }
-
-  int numFiles() const { return (int)m_files.size(); }
-  int index(const std::string& filename)
-  {
-    int i = 0;
-    for (auto iter = m_files.begin(); iter != m_files.end(); ++iter, ++i)
-    {
-      if (iter->first == filename)
-        return i;
-    }
-    return -1;
-  }
-
-  void clear()
-  {
-    m_addrMap.clear();
-    m_files.clear();
-  }
-
-  private:
-    std::map<uint16_t, size_t> m_addrMap;
-    std::map<std::string, SourceFile> m_files;
-};
-
-Source source;
+Source source = Source(opcodes, dissassembler);
 bool sourceLoading = false;
 
 void debuggerLoadSource(const char* rptFileContents)
@@ -957,7 +556,7 @@ void debuggerDisassemblyView(bool* show)
         pc = vrEmu6502DisassembleInstruction(cpu6502, pc, sizeof(instructionBuffer), instructionBuffer, &refAddr, labelMap);
       }
 
-      renderLine(SourceLine(nullptr, instructionBuffer, currentPc));
+      renderLine(SourceLine(instructionBuffer, opcodes, currentPc));
     }
 
     ImGui::PopStyleColor();
@@ -982,8 +581,6 @@ int outputToken(const char *token, const ImVec4 &color, int offset)
 
   return offset + (int)strlen(token);
 }
-
-
 
 static bool Items_FileGetter(void* data, int idx, const char** out_text)
 {
