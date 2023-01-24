@@ -16,6 +16,10 @@ typedef struct {
 
 File* File_Read(const char* filePath);
 File* File_ReadWithSuffix(const char* filePath, const char* suffix);
+File* File_New(const size_t fileSize);
+bool File_Save(const char* fileName, const File* fileInfo);
+bool File_Delete(const char* fileName);
+
 bool File_Free(File* file);
 
 #ifdef __cplusplus

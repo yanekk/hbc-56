@@ -36,3 +36,24 @@ bool File_Free(File* file) {
         free(file);
     return true;
 }
+
+File* File_New(const size_t fileSize) {
+    File* file = calloc(1, sizeof(File));
+    file->size = fileSize;
+    file->isOk = true;
+    file->data = calloc(sizeof(uint8_t), file->size + 1);
+    return file;
+}
+
+bool File_Save(const char* fileName, const File* fileInfo) {
+    FILE* filePtr = fopen(fileName,"wb");
+    if(filePtr == NULL)
+        return false;
+    fwrite(fileInfo->data, sizeof(uint8_t), fileInfo->size, filePtr);
+    fclose(filePtr);
+    return true;
+}
+
+bool File_Delete(const char* fileName) {
+    return remove(fileName);
+}
