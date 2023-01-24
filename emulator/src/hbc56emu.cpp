@@ -39,7 +39,7 @@
 #include "devices/lcd/renderer.h"
 #include "parseargs.h"
 #include "file.h"
-
+#include "utils/memdump.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
@@ -726,6 +726,10 @@ static void doEvents()
 
           case SDLK_F7:
             hbc56DebugBreakOnInt();
+            break;
+
+          case SDLK_F8:
+            MemDump_Save(hbc56MemRead);
             break;
 
           case SDLK_PAGEUP:
