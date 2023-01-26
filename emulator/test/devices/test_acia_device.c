@@ -103,6 +103,22 @@ void test_writeDevice_bytesAreTransmitted(void)
     destroyAciaDevice(&testDevice);
 }
 
+void test_readDevice_transmitterDataRegisterIsAlwaysEmpty(void)
+{
+    // arrange
+    buffer[0] = 0;
+    bufferPtr = buffer;
+    HBC56Device testDevice = createAciaDeviceWithOutput(BASE_ADDRESS, printToBuffer);
+    
+    // act
+    uint8_t status;
+    readDevice(&testDevice, BASE_ADDRESS + 1, &status, true);
+    TEST_CHECK((status & 0x10) == 0x10);
+
+    // cleanup
+    destroyAciaDevice(&testDevice);
+}
+
 TEST_LIST = {
    { "test_createDevice_nameIsSet", test_createDevice_nameIsSet },
    { "test_readDevice_returnsZeroOnAddressOutsideOfScope", test_readDevice_returnsZeroOnAddressOutsideOfScope },
@@ -110,5 +126,6 @@ TEST_LIST = {
    { "test_writeDevice_returnsZeroOnAddressOutsideOfScope", test_writeDevice_returnsZeroOnAddressOutsideOfScope },
    { "test_writeDevice_returnsOneOnAddressInsideScope", test_writeDevice_returnsOneOnAddressInsideScope },
    { "test_writeDevice_bytesAreTransmitted", test_writeDevice_bytesAreTransmitted },
+   { "test_readDevice_transmitterDataRegisterIsAlwaysEmpty", test_readDevice_transmitterDataRegisterIsAlwaysEmpty },
    { NULL, NULL }     /* zeroed record marking the end of the list */
 };

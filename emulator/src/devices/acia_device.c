@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdbool.h>
+#include <stdio.h>
 
 #include "acia_device.h"
 #include "acia/acia.h"
@@ -49,13 +50,20 @@ static AciaDevice* getAciaDevice(HBC56Device* device) {
 }
 
 static bool isAddressInRange(AciaDevice* device, uint16_t address) {
-  return address >= device->startAddress && address <= device->startAddress + ACIA_CONTROL;
+  return address >= device->startAddress 
+      && address <= device->startAddress + ACIA_CONTROL;
 }
 
 uint8_t readAciaDevice(HBC56Device* device, uint16_t address, uint8_t* value, uint8_t dbg) {
   AciaDevice* aciaDevice = getAciaDevice(device);
   if(aciaDevice == NULL || !isAddressInRange(aciaDevice, address))
     return 0;
+    
+  switch(address - aciaDevice->startAddress) {
+    case ACIA_STATUS:
+    *value = 0x10;
+    break;
+  }
   return 1;
 }
 
@@ -80,6 +88,6 @@ void destroyAciaDevice(HBC56Device* device) {
       if(aciaDevice->acia != NULL)
         ACIA_Free(aciaDevice->acia);
       free(aciaDevice);
-    }
-        
+      device->data = NULL;
+    }        
 }

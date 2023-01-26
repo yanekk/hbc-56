@@ -53,6 +53,8 @@
 #define HBC56_DUAL_LCD_SEGMENT_A 0x4200
 #define HBC56_DUAL_LCD_SEGMENT_B 0x4400
 
+#define HBC56_ACIA_ADDRESS       0x4800
+
 #define HBC56_HAVE_NES          0
 #define HBC56_NES_PORT          0x82
 

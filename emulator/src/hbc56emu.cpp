@@ -37,6 +37,7 @@
 #include "devices/cf_device.h"
 #include "devices/dual_lcd_device.h"
 #include "devices/lcd/renderer.h"
+#include "devices/acia_device.h"
 #include "parseargs.h"
 #include "file.h"
 #include "utils/memdump.h"
@@ -1084,7 +1085,8 @@ int main(int argc, char* argv[])
 
   LcdRenderer* lcdRenderer = LcdRenderer_Create(renderer);
   hbc56AddDevice(createDualLcdDevice(lcdRenderer, HBC56_DUAL_LCD_SEGMENT_A, HBC56_DUAL_LCD_SEGMENT_B));
-  
+  hbc56AddDevice(createAciaDevice(HBC56_ACIA_ADDRESS));
+
   done = 0;
 
   /* reset the machine */
