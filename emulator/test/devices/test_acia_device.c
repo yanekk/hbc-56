@@ -52,34 +52,38 @@ void test_readDevice_returnsOneOnAddressInsideScope(void)
     destroyAciaDevice(&testDevice);
 }
 
-// void test_writeDevice_returnsZeroOnAddressOutsideOfScope(void)
-// {
-//     // arrange
-//     testInit(); 
+void test_writeDevice_returnsZeroOnAddressOutsideOfScope(void)
+{
+    // arrange
+    HBC56Device testDevice = createAciaDevice(BASE_ADDRESS);
     
-//     // act
-//     uint8_t isHandled = writeDevice(&testDevice, 0x2007, 0);
+    // act & assert
+    TEST_CHECK(writeDevice(&testDevice, BASE_ADDRESS-1, 0) == 0);
+    TEST_CHECK(writeDevice(&testDevice, BASE_ADDRESS+4, 0) == 0);
 
-//     // assert
-//     TEST_ASSERT(isHandled == 0);
-// }
+    // cleanup
+    destroyAciaDevice(&testDevice);
+}
 
-// void test_writeDevice_returnsOneOnAddressInsideScope(void)
-// {
-//     // arrange
-//     testInit(); 
+void test_writeDevice_returnsOneOnAddressInsideScope(void)
+{
+    // arrange
+    HBC56Device testDevice = createAciaDevice(BASE_ADDRESS);
     
-//     // act
-//     uint8_t isHandled = writeDevice(&testDevice, BASE_ADDRESS + 2, 0);
+    // act
+    TEST_CHECK(writeDevice(&testDevice, BASE_ADDRESS, 0) == 1);
+    TEST_CHECK(writeDevice(&testDevice, BASE_ADDRESS+3, 0) == 1);
 
-//     // assert
-//     TEST_ASSERT(isHandled == 1);
-// }
+    // cleanup
+    destroyAciaDevice(&testDevice);
+}
 
 TEST_LIST = {
    { "test_createDevice_nameIsSet", test_createDevice_nameIsSet },
    { "test_readDevice_returnsZeroOnAddressOutsideOfScope", test_readDevice_returnsZeroOnAddressOutsideOfScope },
    { "test_readDevice_returnsOneOnAddressInsideScope", test_readDevice_returnsOneOnAddressInsideScope },
+   { "test_writeDevice_returnsZeroOnAddressOutsideOfScope", test_writeDevice_returnsZeroOnAddressOutsideOfScope },
+   { "test_writeDevice_returnsOneOnAddressInsideScope", test_writeDevice_returnsOneOnAddressInsideScope },
 
 //    { "test_writeDevice_returnsZeroOnAddressOutsideOfScope", test_writeDevice_returnsZeroOnAddressOutsideOfScope },
 //    { "test_writeDevice_returnsOneOnAddressInsideScope", test_writeDevice_returnsOneOnAddressInsideScope }, 

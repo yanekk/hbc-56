@@ -25,8 +25,8 @@ HBC56Device createAciaDevice(uint16_t startAddr)
   device.data = (void*)aciaDevice;
 
   device.readFn = &readAciaDevice;
-//   device.writeFn = &writeAciaDevice;
-    device.destroyFn = &destroyAciaDevice;
+  device.writeFn = &writeAciaDevice;
+  device.destroyFn = &destroyAciaDevice;
   return device;
 }
 
@@ -40,9 +40,14 @@ static bool isAddressInRange(AciaDevice* device, uint16_t address) {
 
 uint8_t readAciaDevice(HBC56Device* device, uint16_t address, uint8_t* value, uint8_t dbg) {
   AciaDevice* aciaDevice = getAciaDevice(device);
-  if(aciaDevice == NULL)
+  if(aciaDevice == NULL || !isAddressInRange(aciaDevice, address))
     return 0;
-  if(!isAddressInRange(aciaDevice, address))
+  return 1;
+}
+
+uint8_t writeAciaDevice(HBC56Device* device, uint16_t address, uint8_t value) {
+  AciaDevice* aciaDevice = getAciaDevice(device);
+  if(aciaDevice == NULL || !isAddressInRange(aciaDevice, address))
     return 0;
   return 1;
 }
