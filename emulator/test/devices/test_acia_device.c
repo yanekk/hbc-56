@@ -97,7 +97,7 @@ void test_writeDevice_bytesAreTransmitted(void)
     writeDevice(&testDevice, BASE_ADDRESS, 'b');
     writeDevice(&testDevice, BASE_ADDRESS, 'c');
     
-    TEST_CHECK(strcmp(buffer, 'abc') == 1);
+    TEST_CHECK(strcmp(buffer, "abc") == 0);
 
     // cleanup
     destroyAciaDevice(&testDevice);
