@@ -183,7 +183,7 @@ void test_timer1PB7Output_enable(void)
 
     // assert
     TEST_CHECK_(VIA_Timer1_GetPB7Output(via) == true, 
-        "Expected PB7 to be enabled, is disabled");
+        "Expected PB7 to be enabled, is was disabled");
 
     // cleanup
     VIA_Free(via);
@@ -199,7 +199,7 @@ void test_timer1PB7Output_disable(void)
 
     // assert
     TEST_CHECK_(VIA_Timer1_GetPB7Output(via) == false, 
-        "Expected PB7 output to be disabled, is enabled");
+        "Expected PB7 output to be disabled, is was enabled");
 
     // cleanup
     VIA_Free(via);
@@ -211,11 +211,11 @@ void test_timer1Interrupt_enable(void)
     VIA* via = VIA_New();
 
     // act 
-    VIA_Timer1_SetInterrupt(via, true); 
+    VIA_Timer1_EnableInterrupt(via); 
 
     // assert
-    TEST_CHECK_(VIA_Timer1_GetInterrupt(via) == true, 
-        "Expected interrupt to be enabled, is disabled");
+    TEST_CHECK_(VIA_Timer1_IsInterruptEnabled(via) == true, 
+        "Expected interrupt to be enabled, is was disabled");
 
     // cleanup
     VIA_Free(via);
@@ -227,11 +227,45 @@ void test_timer1Interrupt_disable(void)
     VIA* via = VIA_New();
 
     // act 
-    VIA_Timer1_SetInterrupt(via, false); 
+    VIA_Timer1_EnableInterrupt(via); 
+    VIA_Timer1_DisableInterrupt(via); 
 
     // assert
-    TEST_CHECK_(VIA_Timer1_GetInterrupt(via) == false, 
-        "Expected interrupt to be disabled, is enabled");
+    TEST_CHECK_(VIA_Timer1_IsInterruptEnabled(via) == false, 
+        "Expected interrupt to be disabled, is was enabled");
+
+    // cleanup
+    VIA_Free(via);
+}
+
+void test_timer1Interrupt_set(void)
+{
+    // arrange
+    VIA* via = VIA_New();
+
+    // act 
+    VIA_Timer1_SetInterrupt(via); 
+
+    // assert
+    TEST_CHECK_(VIA_Timer1_IsInterruptSet(via) == true, 
+        "Expected interrupt to be set, is was cleared");
+
+    // cleanup
+    VIA_Free(via);
+}
+
+void test_timer1Interrupt_clear(void)
+{
+    // arrange
+    VIA* via = VIA_New();
+
+    // act 
+    VIA_Timer1_SetInterrupt(via); 
+    VIA_Timer1_ClearInterrupt(via); 
+
+    // assert
+    TEST_CHECK_(VIA_Timer1_IsInterruptSet(via) == false, 
+        "Expected interrupt to be cleared, is was set");
 
     // cleanup
     VIA_Free(via);
@@ -253,6 +287,9 @@ TEST_LIST = {
 
    { "test_timer1Interrupt_enable", test_timer1Interrupt_enable },
    { "test_timer1Interrupt_disable", test_timer1Interrupt_disable },
+
+   { "test_timer1Interrupt_set", test_timer1Interrupt_set },
+   { "test_timer1Interrupt_clear", test_timer1Interrupt_clear },
 
    { NULL, NULL }     /* zeroed record marking the end of the list */
 };

@@ -39,8 +39,13 @@ VIATimerMode VIA_Timer1_GetMode(VIA* via);
 void VIA_Timer1_SetPB7Output(VIA* via, bool isEnabled);
 bool VIA_Timer1_GetPB7Output(VIA* via);
 
-void VIA_Timer1_SetInterrupt(VIA* via, bool isEnabled);
-bool VIA_Timer1_GetInterrupt(VIA* via);
+bool VIA_Timer1_IsInterruptEnabled(VIA* via);
+void VIA_Timer1_EnableInterrupt(VIA* via);
+void VIA_Timer1_DisableInterrupt(VIA* via);
+
+bool VIA_Timer1_IsInterruptSet(VIA* via);
+void VIA_Timer1_SetInterrupt(VIA* via);
+void VIA_Timer1_ClearInterrupt(VIA* via);
 
 void VIA_Free(VIA* via);
 

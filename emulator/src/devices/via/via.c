@@ -6,7 +6,7 @@ struct VIA {
     VIATimerState timer1State;
     uint16_t timer1InitialValue, timer1Value;
     VIATimerMode timer1mode;
-    bool PB7OutputEnabled, interruptEnabled;
+    bool PB7OutputEnabled, interruptEnabled, interruptSet;
 };
 
 VIA* VIA_New() {
@@ -62,12 +62,28 @@ bool VIA_Timer1_GetPB7Output(VIA* via) {
     return via->PB7OutputEnabled;
 }
 
-void VIA_Timer1_SetInterrupt(VIA* via, bool isEnabled) {
-    via->interruptEnabled = isEnabled;
+bool VIA_Timer1_IsInterruptEnabled(VIA* via) {
+    return via->interruptEnabled;
 }
 
-bool VIA_Timer1_GetInterrupt(VIA* via) {
-    return via->interruptEnabled;
+void VIA_Timer1_EnableInterrupt(VIA* via) {
+    via->interruptEnabled = true;
+}
+
+void VIA_Timer1_DisableInterrupt(VIA* via) {
+    via->interruptEnabled = false;
+}
+
+bool VIA_Timer1_IsInterruptSet(VIA* via) {
+    return via->interruptSet;
+}
+
+void VIA_Timer1_SetInterrupt(VIA* via) {
+    via->interruptSet = true;
+}
+
+void VIA_Timer1_ClearInterrupt(VIA* via) {
+    via->interruptSet = false;
 }
 
 void VIA_Free(VIA* via) {
