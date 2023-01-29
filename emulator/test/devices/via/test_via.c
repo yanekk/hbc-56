@@ -18,7 +18,7 @@ void test_create_timer1StateIsStoppedByDefault(void)
     VIA_Free(via);
 }
 
-void test_create_timer1CanBeSet(void)
+void test_set_timer1CanBeSet(void)
 {
     // arrange
     uint16_t expectedTimerValue = 0xFAAD;
@@ -36,7 +36,7 @@ void test_create_timer1CanBeSet(void)
     VIA_Free(via);
 }
 
-void test_create_timer1IsNotDecrementedInfNotStarted(void)
+void test_decrement_timer1IsNotDecrementedInfNotStarted(void)
 {
     // arrange
     uint16_t initialTimerValue = 0xCDDA;
@@ -54,7 +54,7 @@ void test_create_timer1IsNotDecrementedInfNotStarted(void)
     VIA_Free(via);
 }
 
-void test_create_timer1StateIsRunningIfStarted(void)
+void test_state_timer1StateIsRunningIfStarted(void)
 {
     // arrange
     VIA* via = VIA_New();
@@ -72,7 +72,7 @@ void test_create_timer1StateIsRunningIfStarted(void)
     VIA_Free(via);
 }
 
-void test_create_timer1CanBeDecrementedIfStarted(void)
+void test_decrement_timer1CanBeDecrementedIfStarted(void)
 {
     // arrange
     uint16_t initialTimerValue = 0xCDDA;
@@ -92,7 +92,7 @@ void test_create_timer1CanBeDecrementedIfStarted(void)
     VIA_Free(via);
 }
 
-void test_create_timer1CanBeReset(void)
+void test_reset_timer1CanBeReset(void)
 {
     // arrange
     uint16_t initialTimerValue = 0xDAAF;
@@ -115,7 +115,7 @@ void test_create_timer1CanBeReset(void)
     VIA_Free(via);
 }
 
-void test_create_timer1CannotBeOverflown(void)
+void test_decrement_timer1CannotBeOverflown(void)
 {
     // arrange
     uint16_t initialTimerValue = 1;
@@ -136,7 +136,7 @@ void test_create_timer1CannotBeOverflown(void)
     VIA_Free(via);
 }
 
-void test_create_timer1IsStoppedOnZero(void)
+void test_decrement_timer1IsStoppedOnZero(void)
 {
     // arrange
     uint16_t initialTimerValue = 1;
@@ -156,15 +156,103 @@ void test_create_timer1IsStoppedOnZero(void)
     VIA_Free(via);
 }
 
+void test_setMode_timer1ModeIsSet(void)
+{
+    // arrange
+    VIA* via = VIA_New();
+
+    // act 
+    VIA_Timer1_SetMode(via, OneShot); 
+
+    // assert
+    VIATimerMode actualMode = VIA_Timer1_GetMode(via);
+    TEST_CHECK_(actualMode == OneShot, 
+        "Expected timer mode to be OneShot, got %d", actualMode);
+
+    // cleanup
+    VIA_Free(via);
+}
+
+void test_timer1PB7Output_enable(void)
+{
+    // arrange
+    VIA* via = VIA_New();
+
+    // act 
+    VIA_Timer1_SetPB7Output(via, true); 
+
+    // assert
+    TEST_CHECK_(VIA_Timer1_GetPB7Output(via) == true, 
+        "Expected PB7 to be enabled, is disabled");
+
+    // cleanup
+    VIA_Free(via);
+}
+
+void test_timer1PB7Output_disable(void)
+{
+    // arrange
+    VIA* via = VIA_New();
+
+    // act 
+    VIA_Timer1_SetPB7Output(via, false); 
+
+    // assert
+    TEST_CHECK_(VIA_Timer1_GetPB7Output(via) == false, 
+        "Expected PB7 output to be disabled, is enabled");
+
+    // cleanup
+    VIA_Free(via);
+}
+
+void test_timer1Interrupt_enable(void)
+{
+    // arrange
+    VIA* via = VIA_New();
+
+    // act 
+    VIA_Timer1_SetInterrupt(via, true); 
+
+    // assert
+    TEST_CHECK_(VIA_Timer1_GetInterrupt(via) == true, 
+        "Expected interrupt to be enabled, is disabled");
+
+    // cleanup
+    VIA_Free(via);
+}
+
+void test_timer1Interrupt_disable(void)
+{
+    // arrange
+    VIA* via = VIA_New();
+
+    // act 
+    VIA_Timer1_SetInterrupt(via, false); 
+
+    // assert
+    TEST_CHECK_(VIA_Timer1_GetInterrupt(via) == false, 
+        "Expected interrupt to be disabled, is enabled");
+
+    // cleanup
+    VIA_Free(via);
+}
+
 TEST_LIST = {
    { "test_create_timer1StateIsStoppedByDefault", test_create_timer1StateIsStoppedByDefault },
-   { "test_create_timer1CanBeSet", test_create_timer1CanBeSet },
-   { "test_create_timer1IsNotDecrementedInfNotStarted", test_create_timer1IsNotDecrementedInfNotStarted },
-   { "test_create_timer1StateIsRunningIfStarted", test_create_timer1StateIsRunningIfStarted },
-   { "test_create_timer1CanBeDecrementedIfStarted", test_create_timer1CanBeDecrementedIfStarted },
-   { "test_create_timer1CanBeReset", test_create_timer1CanBeReset },
-   { "test_create_timer1CannotBeOverflown", test_create_timer1CannotBeOverflown },
-   { "test_create_timer1IsStoppedOnZero", test_create_timer1IsStoppedOnZero },
+   { "test_set_timer1CanBeSet", test_set_timer1CanBeSet },
+   { "test_decrement_timer1IsNotDecrementedInfNotStarted", test_decrement_timer1IsNotDecrementedInfNotStarted },
+   { "test_state_timer1StateIsRunningIfStarted", test_state_timer1StateIsRunningIfStarted },
+   { "test_decrement_timer1CanBeDecrementedIfStarted", test_decrement_timer1CanBeDecrementedIfStarted },
+   { "test_reset_timer1CanBeReset", test_reset_timer1CanBeReset },
+   { "test_decrement_timer1CannotBeOverflown", test_decrement_timer1CannotBeOverflown },
+   { "test_decrement_timer1IsStoppedOnZero", test_decrement_timer1IsStoppedOnZero },
+   { "test_setMode_timer1ModeIsSet", test_setMode_timer1ModeIsSet },
+   
+   { "test_timer1PB7Output_enable", test_timer1PB7Output_enable },
+   { "test_timer1PB7Output_disable", test_timer1PB7Output_disable },
+
+   { "test_timer1Interrupt_enable", test_timer1Interrupt_enable },
+   { "test_timer1Interrupt_disable", test_timer1Interrupt_disable },
 
    { NULL, NULL }     /* zeroed record marking the end of the list */
 };

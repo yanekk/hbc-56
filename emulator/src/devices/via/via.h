@@ -5,12 +5,19 @@
 extern "C" {
 #endif
 
-#include "stdint.h"
+#include <stdint.h>
+#include <stdbool.h>
 
 typedef enum {
     Stopped,
     Running
 } VIATimerState;
+
+typedef enum {
+    Undefined,
+    OneShot,
+    Continuous
+} VIATimerMode;
 
 struct VIA;
 typedef struct VIA VIA;
@@ -25,6 +32,16 @@ VIATimerState VIA_Timer1_State(VIA* via);
 void VIA_Timer1_Start(VIA* via);
 void VIA_Timer1_Decrement(VIA* via);
 void VIA_Timer1_Reset(VIA* via);
+
+void VIA_Timer1_SetMode(VIA* via, VIATimerMode mode);
+VIATimerMode VIA_Timer1_GetMode(VIA* via);
+
+void VIA_Timer1_SetPB7Output(VIA* via, bool isEnabled);
+bool VIA_Timer1_GetPB7Output(VIA* via);
+
+void VIA_Timer1_SetInterrupt(VIA* via, bool isEnabled);
+bool VIA_Timer1_GetInterrupt(VIA* via);
+
 void VIA_Free(VIA* via);
 
 #ifdef __cplusplus
