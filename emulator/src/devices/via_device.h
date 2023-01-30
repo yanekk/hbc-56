@@ -23,6 +23,14 @@ extern "C" {
 #define VIA_IFR  13
 #define VIA_IER  14
 
+#define VIA_ACR_TIMER1_CONTINOUS_MODE 0b01000000
+
+#define VIA_IER_SET    0b10000000
+#define VIA_IER_TIMER1 0b01000000
+
+#define VIA_IFR_ANY    0b10000000
+#define VIA_IFR_TIMER1 0b01000000
+
 HBC56Device createViaDevice(uint16_t baseAddr);
 void destroyViaDevice(HBC56Device* viaDevice);
 
