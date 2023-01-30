@@ -11,7 +11,10 @@ struct VIA {
 
 VIA* VIA_New() {
     VIA* via = malloc(sizeof(VIA));
-    via->timer1State = Stopped;
+    via->timer1State      = Stopped;
+    via->interruptSet     = false;
+    via->interruptEnabled = false;
+    via->PB7OutputEnabled = false;
     return via;
 }
 

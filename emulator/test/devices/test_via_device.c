@@ -79,7 +79,12 @@ void test_writeDevice_returnsOneOnAddressInsideScope(void)
     destroyDevice(&testDevice);
 }
 
-uint8_t hbcInterruptCallCount = 0;
+uint8_t hbcInterruptCallCount[] = {0, 0};
+void hbc56Interrupt(uint8_t irq, HBC56InterruptSignal signal) {
+    hbcInterruptCallCount[signal]++;
+}
+
+
 void test_timer1_freeMode_noPB7Output(void)
 {
     // arrange
@@ -101,11 +106,11 @@ void test_timer1_freeMode_noPB7Output(void)
     tickDevice(&testDevice, 16, 0);
 
     // assert
-    TEST_CHECK_(hbcInterruptCallCount == 1, "expected HBC interrupt to be called once, found %d", hbcInterruptCallCount);
+    TEST_CHECK_(hbcInterruptCallCount[INTERRUPT_RAISE] == 1, "expected HBC interrupt to be called once, found %d", hbcInterruptCallCount[INTERRUPT_RAISE]);
 
     uint8_t actualInterruptFlag;
-    readDevice(&readDevice, VIA_REG(VIA_IFR), &actualInterruptFlag, true);
-    TEST_CHECK_(actualInterruptFlag == VIA_IFR_ANY | VIA_IFR_TIMER1, 
+    readDevice(&testDevice, VIA_REG(VIA_IFR), &actualInterruptFlag, true);
+    TEST_CHECK_(actualInterruptFlag == (VIA_IFR_ANY | VIA_IFR_TIMER1), 
         "expected interrupt flag to be set to timer1, found %X", actualInterruptFlag);
 
     // cleanup
@@ -118,5 +123,6 @@ TEST_LIST = {
    { "test_readDevice_returnsOneOnAddressInsideScope", test_readDevice_returnsOneOnAddressInsideScope },
    { "test_writeDevice_returnsZeroOnAddressOutsideOfScope", test_writeDevice_returnsZeroOnAddressOutsideOfScope },
    { "test_writeDevice_returnsOneOnAddressInsideScope", test_writeDevice_returnsOneOnAddressInsideScope },
+   { "test_timer1_freeMode_noPB7Output", test_timer1_freeMode_noPB7Output },
    { NULL, NULL }     /* zeroed record marking the end of the list */
 };
