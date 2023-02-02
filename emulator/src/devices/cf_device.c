@@ -80,12 +80,18 @@ static void destroyCompactFlashDevice(HBC56Device *device)
   device->data = NULL;
 }
 
+static bool isAddressInRange(const CompactFlashDevice* device, uint16_t address) {
+  return address >= device->startAddr
+      && address <= device->startAddr + CF_CMD;
+}
+
 static uint8_t readCompactFlashDevice(HBC56Device* device, uint16_t addr, uint8_t *val, uint8_t dbg)
 {
   const CompactFlashDevice* cfDevice = getCompactFlashDevice(device);
-  uint16_t offset = addr - cfDevice->startAddr;
+  if(!isAddressInRange(cfDevice, addr))
+    return 0;
 
-  switch(offset) {
+  switch(addr - cfDevice->startAddr) {
     case CF_STAT:
     *val |= CF_Read_Status_Error(cfDevice->compactFlash) << 0;
     *val |= CF_Read_Status_CorrectableDataError(cfDevice->compactFlash) << 2;
@@ -115,9 +121,10 @@ static uint8_t readCompactFlashDevice(HBC56Device* device, uint16_t addr, uint8_
 static uint8_t writeCompactFlashDevice(HBC56Device* device, uint16_t addr, uint8_t val)
 {
     const CompactFlashDevice* cfDevice = getCompactFlashDevice(device);
-    uint8_t offset = addr - cfDevice->startAddr;
-    
-    switch(offset) {
+    if(!isAddressInRange(cfDevice, addr))
+      return 0;
+
+    switch(addr - cfDevice->startAddr) {
       case CF_SECCO:
       CF_Write_SectorCount(cfDevice->compactFlash, val);
       return 1;

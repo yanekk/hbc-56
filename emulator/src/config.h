@@ -45,6 +45,8 @@
 
 #define HBC56_CF_ADDRESS        0x5000
 
+#define HBC56_VIA_ADDRESS        0x6000
+
 #define HBC56_HAVE_LCD          0
 #define HBC56_LCD_PORT          0x02
 #define HBC56_LCD_CMD_PORT      HBC56_LCD_PORT

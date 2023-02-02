@@ -4,7 +4,7 @@
 #include "devices/compactflash/compactflash.h"
 #include "file.h"
 
-#define BASE_ADDRESS 0x1000
+#define BASE_ADDRESS 0x6000
 
 typedef struct CompactFlashSpy {
     bool isCreated,
@@ -203,7 +203,7 @@ void test_readDevice_returnsZeroOnAddressOutsideOfScope(void)
     
     // act
     uint8_t value = 0;
-    uint8_t isHandled = readDevice(&testDevice, 0x2007, &value, true);
+    uint8_t isHandled = readDevice(&testDevice, BASE_ADDRESS+0x1000 + 4, &value, true);
 
     // assert
     TEST_ASSERT(isHandled == 0);
@@ -228,7 +228,7 @@ void test_writeDevice_returnsZeroOnAddressOutsideOfScope(void)
     testInit(); 
     
     // act
-    uint8_t isHandled = writeDevice(&testDevice, 0x2007, 0);
+    uint8_t isHandled = writeDevice(&testDevice, BASE_ADDRESS+0x1000 + 4, 0);
 
     // assert
     TEST_ASSERT(isHandled == 0);
