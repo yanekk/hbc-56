@@ -59,12 +59,12 @@ build: $(BIN_DIR)/$(OUT).exe
 $(C_OBJECTS) : obj/%.o : %.c 
 	mkdir -p $(dir $@)
 	$(info Compiling $<)
-	$(GCC) -g $(MODULE_CFLAGS) $(CFLAGS_W) $(INCLUDES) -I$(INCLUDE_PATH) -c $< -o $@
+	$(GCC) -O1 $(MODULE_CFLAGS) $(CFLAGS_W) $(INCLUDES) -I$(INCLUDE_PATH) -c $< -o $@
 
 $(CPP_OBJECTS) : obj/%.o : %.cpp
 	mkdir -p $(dir $@)
 	$(info Compiling $<)
-	$(GPP) -g $(MODULE_CFLAGS) $(CFLAGS_W) $(INCLUDES) -I$(INCLUDE_PATH) -c $< -o $@
+	$(GPP) -O1 $(MODULE_CFLAGS) $(CFLAGS_W) $(INCLUDES) -I$(INCLUDE_PATH) -c $< -o $@
 
 OBJECTS = $(C_OBJECTS) $(CPP_OBJECTS)
 
@@ -99,17 +99,17 @@ CPP_OBJECTS := $(CPP_SOURCES:%.cpp=$(OBJ_DIR)/%.o)
 $(C_OBJECTS) : obj/%.o : %.c
 	mkdir -p $(dir $@)
 	$(info Compiling $<)
-	$(GCC) -g $(MODULE_CFLAGS) $(CFLAGS_W) $(INCLUDES_TEST) -I$(INCLUDE_PATH) -c $(subst \,/,$<) -o $@
+	$(GCC) -O1 $(MODULE_CFLAGS) $(CFLAGS_W) $(INCLUDES_TEST) -I$(INCLUDE_PATH) -c $(subst \,/,$<) -o $@
 
 $(CPP_OBJECTS) : obj/%.o : %.cpp
 	mkdir -p $(dir $@)
 	$(info Compiling $<)
-	$(GPP) -g $(MODULE_CFLAGS) $(CFLAGS_W) $(INCLUDES_TEST) -I$(INCLUDE_PATH) -c $(subst \,/,$<) -o $@
+	$(GPP) -O1 $(MODULE_CFLAGS) $(CFLAGS_W) $(INCLUDES_TEST) -I$(INCLUDE_PATH) -c $(subst \,/,$<) -o $@
 
 test: $(C_OBJECTS) $(CPP_OBJECTS)
 	$(info Building test executable...)
 	mkdir -p $(BIN_DIR)
-	$(GPP) -g $(CFLAGS_W) $(C_OBJECTS) $(CPP_OBJECTS) -o $(BIN_DIR)/run_tests -lmingw32 -lsdl2main -lsdl2
+	$(GPP) -no-pie $(CFLAGS_W) $(C_OBJECTS) $(CPP_OBJECTS) -pg -o $(BIN_DIR)/run_tests -lmingw32 -lsdl2main -lsdl2
 	$(BIN_DIR)/run_tests.exe
 else
 SOURCES := $(shell /usr/bin/find test -name 'test_*.c')

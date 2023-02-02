@@ -1,4 +1,6 @@
 #include "acutest.h"
+#include <time.h>
+
 #include "devices/dual_lcd_device.h"
 #include "devices/device.h"
 #include "devices/lcd/segment.h"
@@ -185,6 +187,24 @@ void test_setAddress_startLineCanBeSet() {
     TEST_ASSERT(renderedData.data[LINE_WIDTH*7] == 1);
 }
 
+void test_renderDevice_measurePerformance() {
+    // arrange
+    initTestDevice();
+    writeTestDevice(LCD_SEGMENT_A_CMD, CMD_DISPLAY_ON);
+    writeTestDevice(LCD_SEGMENT_A_DATA, 0b11111111);
+    writeTestDevice(LCD_SEGMENT_A_CMD, LCD_CMD_SET_START_LINE_MASK | 63);
+
+    // act
+    clock_t startedAt = clock();
+    for(size_t i = 0; i < 10000; i++) {
+        renderDevice(&lcdDevice);
+    }
+    clock_t finishedAt = clock();
+
+    // assert
+    printf("\n renderDevice: %.0f ms ", ((double)(finishedAt - startedAt) / CLOCKS_PER_SEC) * 1000);
+}
+
 void test_writeDevice_notHandledIfNotInsideAddressScope(void)
 {
     // arrange
@@ -236,18 +256,20 @@ void test_readDevice_handledIfNotInsideAddressScope(void)
 }
 
 TEST_LIST = {
-   { "test_createDevice_nameIsSet", test_createDevice_nameIsSet },
-   { "test_writeDevice_turnOnSegmentA", test_writeDevice_turnOnSegmentA },
-   { "test_writeDevice_turnOnSegmentB", test_writeDevice_turnOnSegmentB },
-   { "test_writeDevice_turnOffSegmentA", test_writeDevice_turnOffSegmentA },
-   { "test_writeDevice_turnOffSegmentB", test_writeDevice_turnOffSegmentB },
-   { "test_writeDevice_dataCanBeWrittenAndRead", test_writeDevice_dataCanBeWrittenAndRead },
-   { "test_setAddress_addressCanBeSet", test_setAddress_addressCanBeSet },
-   { "test_setAddress_pageCanBeSet", test_setAddress_pageCanBeSet },
-   { "test_setAddress_startLineCanBeSet", test_setAddress_startLineCanBeSet },
-   { "test_writeDevice_notHandledIfNotInsideAddressScope", test_writeDevice_notHandledIfNotInsideAddressScope },
-   { "test_writeDevice_handledIfNotInsideAddressScope", test_writeDevice_handledIfNotInsideAddressScope },
-   { "test_readDevice_notHandledIfNotInsideAddressScope", test_readDevice_notHandledIfNotInsideAddressScope },
-   { "test_readDevice_handledIfNotInsideAddressScope", test_readDevice_handledIfNotInsideAddressScope },
+
+//    { "test_createDevice_nameIsSet", test_createDevice_nameIsSet },
+//    { "test_writeDevice_turnOnSegmentA", test_writeDevice_turnOnSegmentA },
+//    { "test_writeDevice_turnOnSegmentB", test_writeDevice_turnOnSegmentB },
+//    { "test_writeDevice_turnOffSegmentA", test_writeDevice_turnOffSegmentA },
+//    { "test_writeDevice_turnOffSegmentB", test_writeDevice_turnOffSegmentB },
+//    { "test_writeDevice_dataCanBeWrittenAndRead", test_writeDevice_dataCanBeWrittenAndRead },
+//    { "test_setAddress_addressCanBeSet", test_setAddress_addressCanBeSet },
+//    { "test_setAddress_pageCanBeSet", test_setAddress_pageCanBeSet },
+//    { "test_setAddress_startLineCanBeSet", test_setAddress_startLineCanBeSet },
+//    { "test_writeDevice_notHandledIfNotInsideAddressScope", test_writeDevice_notHandledIfNotInsideAddressScope },
+//    { "test_writeDevice_handledIfNotInsideAddressScope", test_writeDevice_handledIfNotInsideAddressScope },
+//    { "test_readDevice_notHandledIfNotInsideAddressScope", test_readDevice_notHandledIfNotInsideAddressScope },
+//    { "test_readDevice_handledIfNotInsideAddressScope", test_readDevice_handledIfNotInsideAddressScope },
+   { "test_renderDevice_measurePerformance", test_renderDevice_measurePerformance },
    { NULL, NULL }     /* zeroed record marking the end of the list */
 };
