@@ -935,6 +935,15 @@ static int loadRom(const char* filename)
   return romLoaded;
 }
 
+uint8_t isBreakpoint(uint16_t addr) {
+  if(debuggerIsExitLabel(addr)) {
+    hbc56DebugBreak();
+    done = 1;
+    return 0;
+  }
+  return debuggerIsBreakpoint(addr);
+}
+
 /* Function:  main
  * --------------------
  * the program entry point
@@ -1013,7 +1022,7 @@ int main(int argc, char* argv[])
   SDL_LogSetPriority(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_INFO);
 
   /* add the cpu device */
-  cpuDevice = hbc56AddDevice(create6502CpuDevice(debuggerIsBreakpoint));
+  cpuDevice = hbc56AddDevice(create6502CpuDevice(isBreakpoint));
 
   /* initialise the debugger */
   debuggerInit(getCpuDevice(cpuDevice));
@@ -1038,8 +1047,8 @@ int main(int argc, char* argv[])
   }
   
   loadRom(args.romFile);
-  if(args.breakpointLabel != NULL) {
-    debuggerToggleBreakpointAt(args.breakpointLabel);
+  if(args.exitLabel != NULL) {
+    debuggerSetExitLabel(args.exitLabel);
   }
   /* randomise */
   srand((unsigned int)time(NULL));

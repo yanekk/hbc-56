@@ -131,6 +131,7 @@ void debuggerInitTms(HBC56Device* tms)
 }
 
 std::set<uint16_t> breakpoints;
+uint16_t exitAddress = -1;
 
 uint8_t debuggerIsBreakpoint(uint16_t addr)
 {
@@ -150,11 +151,15 @@ void toggleBreakpoint(uint16_t addr)
   }
 }
 
-void debuggerToggleBreakpointAt(const char* label) 
+bool debuggerIsExitLabel(uint16_t addr) {
+   return addr == exitAddress;
+}
+
+void debuggerSetExitLabel(const char* label) 
 {
   for(size_t i = 0; i < MEMORY_SIZE; i++) {
     if(labelMap[i] != NULL && strcmp(labelMap[i], label) == 0) {
-      toggleBreakpoint(i);
+      exitAddress = i;
       return;
     }
   }

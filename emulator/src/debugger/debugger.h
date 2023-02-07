@@ -25,7 +25,8 @@ void debuggerInitTms(HBC56Device *tms9918);
 uint8_t debuggerIsBreakpoint(uint16_t addr);
 
 void debuggerLoadLabels(const char* labelFileContents);
-void debuggerToggleBreakpointAt(const char* label);
+void debuggerSetExitLabel(const char* label);
+bool debuggerIsExitLabel(uint16_t addr);
 void debuggerLoadSource(const char* rptFileContents);
 
 void debuggerRegistersView(bool* show);

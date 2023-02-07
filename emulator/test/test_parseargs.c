@@ -255,34 +255,34 @@ void test_errorOnCfCardOptionAtTheEnd(void)
     TEST_ASSERT(strcmp(errorBuffer, "No CompactFlash card image file specified. Use --cfcard <filename> to set it.") == 0);
 }
 
-void test_parsingBreakpointOnMissingLabel(void)
+void test_parsingMissingExitLabel(void)
 {
     // arrange
     Hbc56EmulatorArgs args = {0};
-    char* argv[] = {"--rom", EXISTING_ROM_FILE, "--breakpoint-label"};
+    char* argv[] = {"--rom", EXISTING_ROM_FILE, "--exit-label"};
 
     // act
     bool ok = Hbc56EmulatorArgs_Parse(&args, 3, argv, errorBuffer);
 
     // assert
     TEST_CHECK(!ok);
-    TEST_CHECK(args.breakpointLabel == NULL);
-    TEST_CHECK(strcmp(errorBuffer, "Breakpoint label not provided. Use --breakpoint-label <label> to set it.") == 0);
+    TEST_CHECK(args.exitLabel == NULL);
+    TEST_CHECK(strcmp(errorBuffer, "Exit label not provided. Use --exit-label <label> to set it.") == 0);
 }
 
-void test_parsingBreakpointOnProvidedLabel(void)
+void test_parsingExistingExitLabel(void)
 {
     // arrange
     Hbc56EmulatorArgs args = {0};
-    char* expectedBreakpointLabel = "this_is_my_label";
-    char* argv[] = {"--rom", EXISTING_ROM_FILE, "--breakpoint-label", expectedBreakpointLabel};
+    char* expectedExitLabel = "this_is_my_label";
+    char* argv[] = {"--rom", EXISTING_ROM_FILE, "--exit-label", expectedExitLabel};
 
     // act
     bool ok = Hbc56EmulatorArgs_Parse(&args, 4, argv, errorBuffer);
 
     // assert
     TEST_CHECK(ok);
-    TEST_CHECK(strcmp(args.breakpointLabel, expectedBreakpointLabel) == 0);
+    TEST_CHECK(strcmp(args.exitLabel, expectedExitLabel) == 0);
 }
 
 TEST_LIST = {
@@ -301,7 +301,7 @@ TEST_LIST = {
     { "test_errorOnLcdTypeOptionAtTheEnd", test_errorOnLcdTypeOptionAtTheEnd },
     { "test_parsingCfCardFileNoErrorOnExistingFile", test_parsingCfCardFileNoErrorOnExistingFile },
     { "test_parsingCfCardFileErrorOnNonExistingFile", test_parsingCfCardFileErrorOnNonExistingFile },
-    { "test_parsingBreakpointOnMissingLabel", test_parsingBreakpointOnMissingLabel },
-    { "test_parsingBreakpointOnProvidedLabel", test_parsingBreakpointOnProvidedLabel },
+    { "test_parsingMissingExitLabel", test_parsingMissingExitLabel },
+    { "test_parsingExistingExitLabel", test_parsingExistingExitLabel },
    { NULL, NULL }     /* zeroed record marking the end of the list */
 };
