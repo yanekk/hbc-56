@@ -1038,6 +1038,9 @@ int main(int argc, char* argv[])
   }
   
   loadRom(args.romFile);
+  if(args.breakpointLabel != NULL) {
+    debuggerToggleBreakpointAt(args.breakpointLabel);
+  }
   /* randomise */
   srand((unsigned int)time(NULL));
 

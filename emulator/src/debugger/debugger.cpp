@@ -150,6 +150,16 @@ void toggleBreakpoint(uint16_t addr)
   }
 }
 
+void debuggerToggleBreakpointAt(const char* label) 
+{
+  for(size_t i = 0; i < MEMORY_SIZE; i++) {
+    if(labelMap[i] != NULL && strcmp(labelMap[i], label) == 0) {
+      toggleBreakpoint(i);
+      return;
+    }
+  }
+}
+
 static uint8_t printable(uint8_t b)
 {
   if (b < 0x20 || b > 0x7e)
