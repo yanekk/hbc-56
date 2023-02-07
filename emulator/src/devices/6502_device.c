@@ -174,7 +174,7 @@ static void tick6502CpuDevice(HBC56Device* device, uint32_t deltaTicks, double d
       if (doTick)
       {
         vrEmu6502Tick(cpuDevice->cpu6502);
-
+      
         if (vrEmu6502GetOpcodeCycle(cpuDevice->cpu6502) == 0) /* end of the instruction */
         {
           if (cpuDevice->currentState == CPU_BREAK_ON_INTERRUPT)
@@ -195,6 +195,7 @@ static void tick6502CpuDevice(HBC56Device* device, uint32_t deltaTicks, double d
           int isJsr = (nextOpcode == CPU_6502_JSR);
           int isRts = (nextOpcode == CPU_6502_RTS);
           int isBrk = (nextOpcode == CPU_6502_BRK);
+          
 
           if (isRts && cpuDevice->callStackPtr)
           {

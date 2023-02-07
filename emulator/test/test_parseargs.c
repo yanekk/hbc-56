@@ -255,6 +255,36 @@ void test_errorOnCfCardOptionAtTheEnd(void)
     TEST_ASSERT(strcmp(errorBuffer, "No CompactFlash card image file specified. Use --cfcard <filename> to set it.") == 0);
 }
 
+void test_parsingBreakpointOnMissingLabel(void)
+{
+    // arrange
+    Hbc56EmulatorArgs args = {0};
+    char* argv[] = {"--rom", EXISTING_ROM_FILE, "--breakpoint-label"};
+
+    // act
+    bool ok = Hbc56EmulatorArgs_Parse(&args, 3, argv, errorBuffer);
+
+    // assert
+    TEST_CHECK(!ok);
+    TEST_CHECK(args.breakpointLabel == NULL);
+    TEST_CHECK(strcmp(errorBuffer, "Breakpoint label not provided. Use --breakpoint-label <label> to set it.") == 0);
+}
+
+void test_parsingBreakpointOnProvidedLabel(void)
+{
+    // arrange
+    Hbc56EmulatorArgs args = {0};
+    char* expectedBreakpointLabel = "this_is_my_label";
+    char* argv[] = {"--rom", EXISTING_ROM_FILE, "--breakpoint-label", expectedBreakpointLabel};
+
+    // act
+    bool ok = Hbc56EmulatorArgs_Parse(&args, 4, argv, errorBuffer);
+
+    // assert
+    TEST_CHECK(ok);
+    TEST_CHECK(strcmp(args.breakpointLabel, expectedBreakpointLabel) == 0);
+}
+
 TEST_LIST = {
     { "test_parsingFailsOnMissingArgv", test_parsingFailsOnMissingArgv },
     { "test_parsingRomFileNoErrorOnMissingRomOption", test_parsingRomFileNoErrorOnMissingRomOption },
@@ -271,6 +301,7 @@ TEST_LIST = {
     { "test_errorOnLcdTypeOptionAtTheEnd", test_errorOnLcdTypeOptionAtTheEnd },
     { "test_parsingCfCardFileNoErrorOnExistingFile", test_parsingCfCardFileNoErrorOnExistingFile },
     { "test_parsingCfCardFileErrorOnNonExistingFile", test_parsingCfCardFileErrorOnNonExistingFile },
-    { "test_errorOnCfCardOptionAtTheEnd", test_errorOnCfCardOptionAtTheEnd },
+    { "test_parsingBreakpointOnMissingLabel", test_parsingBreakpointOnMissingLabel },
+    { "test_parsingBreakpointOnProvidedLabel", test_parsingBreakpointOnProvidedLabel },
    { NULL, NULL }     /* zeroed record marking the end of the list */
 };

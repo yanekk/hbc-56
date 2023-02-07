@@ -13,6 +13,7 @@ typedef struct {
     char* cfCardImageFile;
     bool breakOnStart;
     LCDType lcdType;
+    char* breakpointLabel;
 } Hbc56EmulatorArgs;
 
 bool Hbc56EmulatorArgs_Parse(Hbc56EmulatorArgs* args, int argc, char* argv[], char errorBuffer[]);

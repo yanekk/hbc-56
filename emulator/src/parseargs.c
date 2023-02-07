@@ -11,6 +11,7 @@
 #define OPTION_BREAK_ON_START "--brk"
 #define OPTION_LCD_TYPE "--lcd"
 #define OPTION_CFCARD "--cfcard"
+#define OPTION_BREAKPOINT_LABEL "--breakpoint-label"
 
 #define ERROR_FILE_NOT_FOUND "File '%s' cannot be found."
 #define ERROR_INVALID_ARGUMENTS "Invalid arguments"
@@ -22,6 +23,8 @@
 #define ERROR_NO_LCD_TYPE_SET "No LCD type set"
 
 #define ERROR_MISSING_CFCARD "No CompactFlash card image file specified. Use --cfcard <filename> to set it."
+
+#define ERROR_MISSING_BREAKPOINT_LABEL "Breakpoint label not provided. Use --breakpoint-label <label> to set it."
 
 bool Hbc56EmulatorArgs_Parse(Hbc56EmulatorArgs* args, int argc, char* argv[], char errorBuffer[]) {
     if (argv == NULL) {
@@ -67,6 +70,7 @@ bool Hbc56EmulatorArgs_Parse(Hbc56EmulatorArgs* args, int argc, char* argv[], ch
                 sprintf(errorBuffer, ERROR_FILE_NOT_FOUND, cfcardImageFilePath); 
                 return false;  
             }
+            fclose(filePtr);
   
             args->cfCardImageFile = cfcardImageFilePath;
         }
@@ -93,7 +97,15 @@ bool Hbc56EmulatorArgs_Parse(Hbc56EmulatorArgs* args, int argc, char* argv[], ch
                     sprintf(errorBuffer, ERROR_UNKNOWN_LCD_TYPE, argv[i]); 
                     return false;
             }
-        }        
+        } 
+        if(strcmp(OPTION_BREAKPOINT_LABEL, argv[i]) == 0) {
+            i++;
+            if (i == argc) {
+                sprintf(errorBuffer, ERROR_MISSING_BREAKPOINT_LABEL); 
+                return false;
+            }
+            args->breakpointLabel = argv[i];
+        }
     }
 
     if (!args->romFile) {

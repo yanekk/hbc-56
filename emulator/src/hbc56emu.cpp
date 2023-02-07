@@ -495,12 +495,12 @@ static void doRender()
   static bool showRegisters = true;
   static bool showStack = true;
   static bool showDisassembly = true;
-  static bool showSource = true;
-  static bool showBreakpoints = true;
+  static bool showSource = false;
+  static bool showBreakpoints = false;
 
   static bool showMemory = true;
-  static bool showTms9918Memory = true;
-  static bool showTms9918Registers = true;
+  static bool showTms9918Memory = false;
+  static bool showTms9918Registers = false;
 
   ImGui_ImplSDLRenderer_NewFrame();
   ImGui_ImplSDL2_NewFrame();
