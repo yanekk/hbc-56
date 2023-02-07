@@ -19,6 +19,7 @@
 extern "C" {
 #endif
 
+void MemDump_SaveToFile(uint8_t (readMemory)(uint16_t, bool), const char* filePath);
 void MemDump_Save(uint8_t (readMemory)(uint16_t, bool));
 
 #ifdef __cplusplus

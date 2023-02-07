@@ -14,6 +14,7 @@ typedef struct {
     bool breakOnStart;
     LCDType lcdType;
     char* exitLabel;
+    char* dumpMemoryFile;
 } Hbc56EmulatorArgs;
 
 bool Hbc56EmulatorArgs_Parse(Hbc56EmulatorArgs* args, int argc, char* argv[], char errorBuffer[]);

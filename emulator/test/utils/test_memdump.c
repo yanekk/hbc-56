@@ -22,7 +22,7 @@ void test_save_memoryIsDumped() {
     File* memDump = File_Read("memdump.bin");
 
     TEST_CHECK_(memDump->isOk, "Memory dump file should be created");
-    TEST_CHECK_(memDump->size == MEMORY_SIZE, "Memory dump should have 65 536 of memory size, got %d", memDump->size);
+    TEST_CHECK_(memDump->size == MEMORY_SIZE, "Memory dump should have 65 536 of memory size, got %lld", memDump->size);
     TEST_CHECK_(memDump->data[0] == FIRST_BYTE, "First byte should be equal to %x, got %x",FIRST_BYTE, memDump->data[0]);
     TEST_CHECK_(memDump->data[MEMORY_SIZE-1] == LAST_BYTE, "Last byte should be equal to %x, got %x", LAST_BYTE, memDump->data[0]);
 
@@ -31,7 +31,26 @@ void test_save_memoryIsDumped() {
     File_Free(memDump);
 }
 
+void test_save_memoryIsDumpedToFile() {
+    // act
+    char* expectedDumpFileName = "custom_memdump.bin";
+    MemDump_SaveToFile(readMemory, expectedDumpFileName);
+
+    // assert
+    File* memDump = File_Read(expectedDumpFileName);
+
+    TEST_CHECK_(memDump->isOk, "Memory dump file should be created");
+    TEST_CHECK_(memDump->size == MEMORY_SIZE, "Memory dump should have 65 536 of memory size, got %lld", memDump->size);
+    TEST_CHECK_(memDump->data[0] == FIRST_BYTE, "First byte should be equal to %x, got %x",FIRST_BYTE, memDump->data[0]);
+    TEST_CHECK_(memDump->data[MEMORY_SIZE-1] == LAST_BYTE, "Last byte should be equal to %x, got %x", LAST_BYTE, memDump->data[0]);
+
+    // cleanup
+    File_Delete(expectedDumpFileName);
+    File_Free(memDump);
+}
+
 TEST_LIST = {
     { "test_save_memoryIsDumped", test_save_memoryIsDumped },
+    { "test_save_memoryIsDumpedToFile", test_save_memoryIsDumpedToFile },
     { NULL, NULL }     /* zeroed record marking the end of the list */
 };

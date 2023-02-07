@@ -51,8 +51,6 @@
 #define DEFAULT_WINDOW_WIDTH  640
 #define DEFAULT_WINDOW_HEIGHT 480
 
-
-
 static HBC56Device devices[HBC56_MAX_DEVICES];
 static int deviceCount = 0;
 
@@ -1121,7 +1119,9 @@ int main(int argc, char* argv[])
     loop();
   }
 #endif
-
+  if(args.dumpMemoryFile) {
+    MemDump_SaveToFile(hbc56MemRead, args.dumpMemoryFile);
+  }
   /* clean up  */
   for (size_t i = 0; i < deviceCount; ++i)
   {

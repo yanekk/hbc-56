@@ -120,4 +120,4 @@ tests: $(SOURCES)
 endif
 
 run:
-	.\bin\hbc56emu.exe --rom H:\src\my-6502\bin\bios.bin --brk --cfcard H:\src\my-6502\bin\cf_card.bin
+	.\bin\hbc56emu.exe --rom H:\src\my-6502\bin\bios.bin --brk --cfcard H:\src\my-6502\bin\cf_card.bin --dump-memory-on-exit memory.dmp --exit-label breakpoint_test

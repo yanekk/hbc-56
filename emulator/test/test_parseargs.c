@@ -285,6 +285,36 @@ void test_parsingExistingExitLabel(void)
     TEST_CHECK(strcmp(args.exitLabel, expectedExitLabel) == 0);
 }
 
+void test_parsingMissingDumpFile(void)
+{
+    // arrange
+    Hbc56EmulatorArgs args = {0};
+    char* argv[] = {"--rom", EXISTING_ROM_FILE, "--dump-memory-on-exit"};
+
+    // act
+    bool ok = Hbc56EmulatorArgs_Parse(&args, 3, argv, errorBuffer);
+
+    // assert
+    TEST_CHECK(!ok);
+    TEST_CHECK(args.dumpMemoryFile == NULL);
+    TEST_CHECK(strcmp(errorBuffer, "Missing memory dump file path. Use --dump-memory-on-exit <filename> to set it.") == 0);
+}
+
+void test_parsingExistingDumpFile(void)
+{
+    // arrange
+    Hbc56EmulatorArgs args = {0};
+    char* expectedDumpFile = "memory.dmp";
+    char* argv[] = {"--rom", EXISTING_ROM_FILE, "--dump-memory-on-exit", expectedDumpFile};
+
+    // act
+    bool ok = Hbc56EmulatorArgs_Parse(&args, 4, argv, errorBuffer);
+
+    // assert
+    TEST_CHECK(ok);
+    TEST_CHECK(strcmp(args.dumpMemoryFile, expectedDumpFile) == 0);
+}
+
 TEST_LIST = {
     { "test_parsingFailsOnMissingArgv", test_parsingFailsOnMissingArgv },
     { "test_parsingRomFileNoErrorOnMissingRomOption", test_parsingRomFileNoErrorOnMissingRomOption },
@@ -303,5 +333,7 @@ TEST_LIST = {
     { "test_parsingCfCardFileErrorOnNonExistingFile", test_parsingCfCardFileErrorOnNonExistingFile },
     { "test_parsingMissingExitLabel", test_parsingMissingExitLabel },
     { "test_parsingExistingExitLabel", test_parsingExistingExitLabel },
+    { "test_parsingMissingDumpFile", test_parsingMissingDumpFile },
+    { "test_parsingExistingDumpFile", test_parsingExistingDumpFile },
    { NULL, NULL }     /* zeroed record marking the end of the list */
 };

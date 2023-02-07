@@ -12,6 +12,7 @@
 #define OPTION_LCD_TYPE "--lcd"
 #define OPTION_CFCARD "--cfcard"
 #define OPTION_EXIT_LABEL "--exit-label"
+#define OPTION_DUMP_ON_EXIT "--dump-memory-on-exit"
 
 #define ERROR_FILE_NOT_FOUND "File '%s' cannot be found."
 #define ERROR_INVALID_ARGUMENTS "Invalid arguments"
@@ -25,6 +26,8 @@
 #define ERROR_MISSING_CFCARD "No CompactFlash card image file specified. Use --cfcard <filename> to set it."
 
 #define ERROR_MISSING_EXIT_LABEL "Exit label not provided. Use --exit-label <label> to set it."
+
+#define ERROR_MISSING_DUMP_FILE "Missing memory dump file path. Use --dump-memory-on-exit <filename> to set it."
 
 bool Hbc56EmulatorArgs_Parse(Hbc56EmulatorArgs* args, int argc, char* argv[], char errorBuffer[]) {
     if (argv == NULL) {
@@ -98,6 +101,7 @@ bool Hbc56EmulatorArgs_Parse(Hbc56EmulatorArgs* args, int argc, char* argv[], ch
                     return false;
             }
         } 
+
         if(strcmp(OPTION_EXIT_LABEL, argv[i]) == 0) {
             i++;
             if (i == argc) {
@@ -105,6 +109,15 @@ bool Hbc56EmulatorArgs_Parse(Hbc56EmulatorArgs* args, int argc, char* argv[], ch
                 return false;
             }
             args->exitLabel = argv[i];
+        }
+
+        if(strcmp(OPTION_DUMP_ON_EXIT, argv[i]) == 0) {
+            i++;
+            if (i == argc) {
+                sprintf(errorBuffer, ERROR_MISSING_DUMP_FILE); 
+                return false;
+            }
+            args->dumpMemoryFile = argv[i];
         }
     }
 
